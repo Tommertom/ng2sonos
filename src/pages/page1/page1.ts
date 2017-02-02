@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
-import { DomoticzService, DomoticzSettingsModel } from './../../providers/domoticz.provider';
+import { SONOSService } from './../../providers/sonos.provider';
+import { Observable } from 'rxjs/Observable';
 
 const defaultSettings = {
-  server: '192.168.178.33',
-  protocol: 'http://',
-  port: '8080',
+  server: '192.168.178.22',
   refreshdelay: 50000
 };
 
@@ -20,11 +19,11 @@ export class Page1 {
   //  idxList: Array<number> = [];
 
   deviceSubscription: any;
-  settings: DomoticzSettingsModel = defaultSettings;
+  settings = defaultSettings;
 
   constructor(
     public navCtrl: NavController,
-    public domoticzService: DomoticzService,
+    public sonosService: SONOSService,
     private toastCtrl: ToastController
   ) { }
 
@@ -33,8 +32,8 @@ export class Page1 {
   }
 
   startObserving() {
-    this.domoticzService.initDomoticzService(this.settings);
-
+    this.sonosService.initService([this.settings.server]);
+    
     // set the initial list
     this.deviceList = [];
 
@@ -45,7 +44,7 @@ export class Page1 {
     }
 
     // and start observing again
-    this.deviceSubscription = this.domoticzService.getDomoticzDeviceObservable()
+    this.deviceSubscription = this.sonosService.getSonosZoneObservable()
       .subscribe(
       value => {
 
@@ -55,7 +54,7 @@ export class Page1 {
         // if an error is received, we kill the watcher and need to do something smart
         else {
           console.log('Error received', value);
-          this.domoticzService.doneDomoticzService();
+          //this.sonosService.doneDomoticzService();
           this.deviceSubscription.unsubscribe();
 
           this.doToast('There was an issue accessing the Domoticz server');

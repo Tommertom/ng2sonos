@@ -20,7 +20,7 @@ Wrapped in Ionic 2 demo app (sidemenu).
 * Run `ionic serve` in a terminal from the project root.
 
 The project will need the UDP cordova plugin to run (for Sonos discovery): `ionic plugin add cordova-plugin-chrome-apps-sockets-udp`, 
-xml2js `npm install xml2js --save` and typings `typings install dt~xml2js --save`. 
+xml2js `npm install typings xml2js --save` and typings `typings install dt~xml2js --save`. 
 
 Due to cross-origin restrictions, this may not work in a browser (although it does with me). So you may need to `ionic run android` or `ionic run ios` to a device 
 or upload in ionic view to see it working. 
@@ -49,6 +49,7 @@ will send initial data whenever you get the Observable and will only do a `compl
 means that some of the RxJS operators (e.g. `toArray()`) won't give any results until the service is stopped.
 
 When the service has encountered an error, it will emit `{ error: err }`, where `err` stands for the error object taken from the HTTP Response.
+If no Sonos topology was found, the emitted error will be `{error: 'No topology'}`.
 
 There are a number of of methods in the service you can use to send actions to a Sonos Zone/Coordinator:
 ```
