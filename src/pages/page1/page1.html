@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Setup Domoticz Watcher</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <h3>Domoticz Settings</h3>
+  <ion-list inset>
+    <ion-item>
+      <ion-label>Domoticz server IP:</ion-label>
+      <ion-input type="text" [(ngModel)]="settings.server"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Domoticz port:</ion-label>
+      <ion-input type="text" [(ngModel)]="settings.port"></ion-input>
+    </ion-item>
+    <ion-item>
+      <h2>Number of devices found : {{deviceList.length}} </h2>
+      <p *ngIf="deviceList.length>0"> Go to menu to see the devices found</p>
+    </ion-item>
+  </ion-list>
+  <button ion-button full (click)="startObserving()">Start observing devices</button>
+</ion-content>

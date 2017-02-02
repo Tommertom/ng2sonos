@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Domoticz Devices</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <ion-card *ngFor="let idx of deviceList">
+    <ion-card-header>{{ deviceData[idx].Name}} - {{ deviceData[idx].Data}}
+      <span *ngIf="isDimmable(deviceData[idx])">
+            - {{deviceData[idx].Level}}
+          </span>
+    </ion-card-header>
+    <ion-card-content>
+      <button ion-button full *ngIf="canToggle(deviceData[idx])" (click)="doToggle(idx)">Let's toggle</button>
+      <ion-list>
+        <ion-item>
+          <ion-label>Switch on or off</ion-label>
+          <ion-toggle *ngIf="canToggle(deviceData[idx])" [checked]="deviceData[idx].Data=='On'" (ionChange)="doOnOff($event,idx)"></ion-toggle>
+        </ion-item>
+      </ion-list>
+      <ion-range *ngIf="isDimmable(deviceData[idx])" [(ngModel)]="deviceData[idx].Level" (ionChange)="doLevelChange($event, idx)"
+        debounce="1000" min="15" max="deviceData[idx].MaxDimLevel">
+        <ion-label range-left>0</ion-label>
+        <ion-label range-right>{{deviceData[idx].MaxDimLevel}}</ion-label>
+        </ion-range>
+        <ion-range *ngIf="canSetTemp(deviceData[idx])" [(ngModel)]="deviceData[idx].SetPoint" (ionChange)="doSetPointChange($event, idx)"
+          debounce="1000" min="15" max="deviceData[idx].MaxDimLevel">
+          <ion-label range-left>0</ion-label>
+          <ion-label range-right>{{deviceData[idx].MaxDimLevel}}</ion-label>
+          </ion-range>
+    </ion-card-content>
+  </ion-card>
+  <ion-card *ngIf="deviceList.length == 0">
+    <ion-card-content>
+      <h1>No devices found</h1>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
