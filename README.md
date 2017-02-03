@@ -6,7 +6,7 @@ Including API calls to control the Sonos.
 Wrapped in Ionic 2 demo app (sidemenu).
 
 ## Todo
-* Do the initial setup - NOTHING IS WORKING YET!!!! (CODE REFACTORING NEEDED)
+* Do the initial setup - UI is not very informative, lots of stuff happening under the hood
 * Add services and methods (subscriptions to changes, play/stop etc.)
 * Error handling (if wrong server is added, no response, wrong response)
 * Documentation and comments
@@ -66,9 +66,8 @@ Provided under Apache2 License.
 
 Zone/Coordinator:
 ```
-
 {
-  "group": "RINCON_898976SADSSS601400:0",
+  "group": "RINCON_XXXXXXXXX01400:0",
   "coordinator": "true",
   "wirelessmode": "1",
   "wirelessleafonly": "0",
@@ -81,31 +80,7 @@ Zone/Coordinator:
   "mincompatibleversion": "33.0-00000",
   "legacycompatibleversion": "25.0-00000",
   "bootseq": "4",
-  "uuid": "RINCON_898976SADSSS601400",
-  "roomname": "Kitchen",
-  "ip": "192.168.178.43",
-  "devicedata": {
-    "root": {
-      "$": {
-        "xmlns": "urn:schemas-upnp-org:device-1-0"
-      },
-      "specVersion": [
-        {
-  {
-  "group": "RINCON_898976SADSSS601400:0",
-  "coordinator": "true",
-  "wirelessmode": "1",
-  "wirelessleafonly": "0",
-  "hasconfiguredssid": "1",
-  "channelfreq": "2437",
-  "behindwifiext": "0",
-  "wifienabled": "1",
-  "location": "http://192.168.178.43:1400/xml/device_description.xml",
-  "version": "34.16-37101",
-  "mincompatibleversion": "33.0-00000",
-  "legacycompatibleversion": "25.0-00000",
-  "bootseq": "4",
-  "uuid": "RINCON_898976SADSSS601400",
+  "uuid": "RINCON_XXXXXXXXX01400",
   "roomname": "Kitchen",
   "ip": "192.168.178.43",
   "device_description": {
@@ -143,7 +118,7 @@ Zone/Coordinator:
       "94-9F-3E-72-5C-D6:6"
     ],
     "UDN": [
-      "uuid:RINCON_898976SADSSS601400"
+      "uuid:RINCON_XXXXXXXXX01400"
     ],
     "iconList": [
       {
@@ -376,7 +351,7 @@ Zone/Coordinator:
               "http://www.sonos.com/products/zoneplayers/S12"
             ],
             "UDN": [
-              "uuid:RINCON_898976SADSSS601400_MS"
+              "uuid:RINCON_XXXXXXXXX01400_MS"
             ],
             "serviceList": [
               {
@@ -445,7 +420,7 @@ Zone/Coordinator:
               "http://www.sonos.com/products/zoneplayers/S12"
             ],
             "UDN": [
-              "uuid:RINCON_898976SADSSS601400_MR"
+              "uuid:RINCON_XXXXXXXXX01400_MR"
             ],
             "serviceList": [
               {
@@ -544,7 +519,7 @@ Zone/Coordinator:
                   "xmlns": "http://www.real.com/rhapsody/xmlns/upnp-1-0"
                 },
                 "deviceID": [
-                  "urn:rhapsody-real-com:device-id-1-0:sonos_1:RINCON_898976SADSSS601400"
+                  "urn:rhapsody-real-com:device-id-1-0:sonos_1:RINCON_XXXXXXXXX01400"
                 ],
                 "deviceCapabilities": [
                   {
