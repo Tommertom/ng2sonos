@@ -22,12 +22,12 @@ Wrapped in Ionic 2 demo app (sidemenu).
 The project will need the UDP cordova plugin to run (for Sonos discovery): `ionic plugin add cordova-plugin-chrome-apps-sockets-udp`, 
 xml2js `npm install typings xml2js --save` and typings `typings install dt~xml2js --save`. 
 
-Due to cross-origin restrictions, this may not work in a browser (although it does with me). So you may need to `ionic run android` or `ionic run ios` to a device 
+Due to cross-origin restrictions, this may not work in a browser (chrome- install cors plugin). So you may need to `ionic run android` or `ionic run ios` to a device 
 or upload in ionic view to see it working. 
 
 This demo is available in Ionic View (similar to Apple's Testflight) under app ID `fb42ab33`. Download Ionic View in your app store (android/iOS), register free 
 Ionic account (https://apps.ionic.io/signup) and enjoy. Assure you do a `Clear App Data` in Ionic View
-if you want to enjoy the latest committed version.
+if you want to enjoy the latest committed version.  NOTE: the app isn't working in Ionic View due to CORS restrictions.
 
 ## Usage of the service
 
