@@ -53,9 +53,17 @@ If no Sonos topology was found, the emitted error will be `{error: 'No topology'
 
 There are a number of of methods in the service you can use to send actions to a Sonos Zone/Coordinator:
 ```
-
+    setEQ(eqType, value, IP) 
+	playSonos(IP) 
+	pauseSonos(IP)
+	stopSonos(IP) 
+	nextSonos(IP) 
+	previousSonos(IP)
+	muteSonos(mute, IP)
+	volumeSonos(volume, IP)
+	getPositionInfo(IP)
 ```
-Where `??` is the unique id of the sonos zone/coordinator.
+Where `IP` is the unique IP of the sonos zone/coordinator.
 
 ## Important!
 Use at own discretion, but if you have any suggestion, let me know or do a PR. 
