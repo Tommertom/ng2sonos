@@ -266,13 +266,17 @@ export class SONOSService {
 									this.getDeviceDescription(location)
 										.subscribe(value => {
 											xml2js.parseString(value, (err, result) => {
-												this.topology[location]['devicedata'] = result
+												this.topology[location]['devicedata'] = result;
+
+												if (location == "192.168.178.43") console.log('ssds', JSON.stringify(this.topology["192.168.178.43"],null,2));
 											})
 										});
 								} // end if
 							});
 
 							console.log('Topology object', this.topologyList, this.topology);
+
+							
 						});
 					},
 					(error) => {

@@ -32,63 +32,67 @@ export class UDPService {
             return buf;
         }
 
-        // register the listeners
-        chrome.sockets.udp.onReceive.addListener(
-            (info) => {
-                // we have found one 
-                console.log('Recv from socket: ', info);
-                this.udpstream.next(info);
-            }
-        );
-        chrome.sockets.udp.onReceiveError.addListener(
-            (error) => {
-                console.log('Recv  ERROR from socket: ', error);
-                this.udpstream.next({ 'error': error });
-            }
-        );
+        // only do udp stuff if there is plugin defined
+        if (typeof chrome.sockets !== 'undefined') {
 
-        // translate the string into ArrayBuffer
-        let SENDBUFFER = str2ab(message);
+            // register the listeners
+            chrome.sockets.udp.onReceive.addListener(
+                (info) => {
+                    // we have found one 
+                    console.log('Recv from socket: ', info);
+                    this.udpstream.next(info);
+                }
+            );
+            chrome.sockets.udp.onReceiveError.addListener(
+                (error) => {
+                    console.log('Recv  ERROR from socket: ', error);
+                    this.udpstream.next({ 'error': error });
+                }
+            );
 
-        // send  the UDP search as captures in UPNPSTRING and to port PORT
-        chrome.sockets.udp.create((createInfo) => {
-            chrome.sockets.udp.bind(createInfo.socketId, '0.0.0.0', port, (bindresult) => {
-                this.socketid = createInfo.socketId;
+            // translate the string into ArrayBuffer
+            let SENDBUFFER = str2ab(message);
 
-                chrome.sockets.udp.setMulticastTimeToLive(createInfo.socketId, ttl, (ttlresult) => {
+            // send  the UDP search as captures in UPNPSTRING and to port PORT
+            chrome.sockets.udp.create((createInfo) => {
+                chrome.sockets.udp.bind(createInfo.socketId, '0.0.0.0', port, (bindresult) => {
+                    this.socketid = createInfo.socketId;
 
-                    chrome.sockets.udp.setBroadcast(createInfo.socketId, true, function (sbresult) {
+                    chrome.sockets.udp.setMulticastTimeToLive(createInfo.socketId, ttl, (ttlresult) => {
 
-                        // do all adresses 
-                        addresses.map(address => {
-                            chrome.sockets.udp.send(createInfo.socketId, SENDBUFFER, address, port, (sendresult) => {
-                                if (sendresult < 0) {
-                                    console.log('send fail: ' + sendresult);
-                                    // close all the stuff, send has failed
-                                    //this.closeUDPService();
-                                    this.udpstream({'error': sendresult});
-                                } else {
-                                    console.log('sendTo: success ' + port, createInfo, bindresult, ttlresult, sbresult, sendresult);
-                                }
+                        chrome.sockets.udp.setBroadcast(createInfo.socketId, true, function (sbresult) {
+
+                            // do all adresses 
+                            addresses.map(address => {
+                                chrome.sockets.udp.send(createInfo.socketId, SENDBUFFER, address, port, (sendresult) => {
+                                    if (sendresult < 0) {
+                                        console.log('send fail: ' + sendresult);
+                                        // close all the stuff, send has failed
+                                        //this.closeUDPService();
+                                        this.udpstream({ 'error': sendresult });
+                                    } else {
+                                        console.log('sendTo: success ' + port, createInfo, bindresult, ttlresult, sbresult, sendresult);
+                                    }
+                                });
                             });
                         });
                     });
                 });
             });
-        });
 
-        // and close the listener after a while
-        setTimeout(() => {
-            this.closeUDPService();
-        }, timetolisten);
-
+            // and close the listener after a while
+            setTimeout(() => {
+                this.closeUDPService();
+            }, timetolisten);
+        }
         // return the stream
         return this.udpstream.asObservable().skip(1);
+
     }
 
     closeUDPService() {
         // close the socket
-        chrome.sockets.udp.close(this.socketid);
+        if (typeof chrome.sockets !== 'undefined') chrome.sockets.udp.close(this.socketid);
 
         // close the stream
         this.udpstream.complete();
