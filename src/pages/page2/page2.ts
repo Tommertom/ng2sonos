@@ -24,6 +24,14 @@ export class Page2 {
     this.startObserving();
   }
 
+  getPositionInfo(ip) {
+    this.sonosService.getPositionInfo(ip);
+  }
+
+  volumeUp(ip) {
+    this.sonosService.volumeSonos('+1', ip);
+  }
+
   startObserving() {
     // set the initial list
     this.deviceList = [];

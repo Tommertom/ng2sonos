@@ -8,8 +8,8 @@ import { Http, Headers } from '@angular/http';
 import { UDPService } from './udp.provider';
 
 export interface SonosSettingsModel {
-    sonosIPs: Array<string>;    // IP adress of sonos zones known
-    refreshdelay: number;       // the ms to wait before a full refresh
+	sonosIPs: Array<string>;    // IP adress of sonos zones known
+	refreshdelay: number;       // the ms to wait before a full refresh
 }
 
 // package install 
@@ -171,6 +171,16 @@ export class SONOSService {
 		this.callAPI('Play', IP, {});
 	}
 
+	volumeSonos(volume, IP) {
+		this.callAPI('Volume', IP, { '{volume}': volume })
+			.subscribe(val => { console.log('volume', val); });
+	}
+
+	getPositionInfo(IP) {
+		this.callAPI('GetPositionInfo', IP, {})
+			.subscribe(val => { console.log('getpos', val); });
+	}
+
 	pauseSonos(IP) {
 
 	}
@@ -191,14 +201,6 @@ export class SONOSService {
 
 	}
 
-	volumeSonos(volume, IP) {
-
-	}
-
-	getPositionInfo(IP) {
-
-	}
-
 	private emitAllZones() {
 		this.topologyList.map(ip => {
 			if (typeof this.topology[ip] !== 'undefined')
@@ -211,8 +213,8 @@ export class SONOSService {
 			if (typeof this.topology[ip] !== 'undefined') {
 				//console.log('test',this.topology[ip]['coordinator'], this.topology[ip]['coordinator'] == "true");
 				if (this.topology[ip]['coordinator'] == "true")
-			this.sonoscoordinators.next(this.topology[ip]); 
-		}
+					this.sonoscoordinators.next(this.topology[ip]);
+			}
 
 		});
 	}
@@ -336,23 +338,26 @@ export class SONOSService {
 
 	// 
 	private callAPI(sonosaction, sonosip, payload) {
-		let SOAPbody = SONOSSOAPTemplates[sonosaction];
-		let SOAPaction = SONOSSoapActions[sonosaction];
-		let SOAPurl = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
+		let SOAPbody:string = SONOSSOAPTemplates[sonosaction];
+		let SOAPaction:string = SONOSSoapActions[sonosaction];
+		let SOAPurl:string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
+
+		console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
 
 		// do a search-replace of all the update data available and then do the HTTP request
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
 
-		console.log('SOAPbody', + SOAPbody);
+		console.log('SOAPbody', SOAPbody);
 
 		// here the full SOAP call
 		let headers = new Headers({ 'Content-Type': 'text/xml' });
 		headers.append('SOAPACTION', SOAPaction);
-		headers.append('CONTENT-LENGTH', SOAPbody.length);
+		headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
 		headers.append('type', 'stream');
 
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
+			.map(res => res.text())
 			.map(res => {
 				xml2js.parseString(res, (err, result) => {
 					return result;
