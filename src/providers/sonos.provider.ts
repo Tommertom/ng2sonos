@@ -1,3 +1,4 @@
+import { UserData } from './../../../ionic-conference-app-master/src/providers/user-data';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 import { Injectable } from '@angular/core';
@@ -105,12 +106,14 @@ export class SONOSService {
 
 	private topology: Object = {};
 	private topologyList: Array<string> = [];
+
 	private sonosIPs: Array<string> = [];
 	private doRefresh: boolean = false;
-	private searchAttempt: number = 0;
+	private refreshdelay: number = 1000;
+
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
-	private plans: BehaviorSubject<Object> = new BehaviorSubject({});
+	private sonosstates: BehaviorSubject<Object> = new BehaviorSubject({});
 
 	constructor(
 		private UDPService: UDPService,
@@ -118,63 +121,100 @@ export class SONOSService {
 	) { };
 
 	// Init service is called when the app is started
-	// this should register all available items to the app (panelitems, conditions, data, actions, and the service itself)
 	initService(sonosIPs: Array<string>) {
-		// try to find topology through IPs given
+
+		// start from scratch
 		this.topologyList = [];
 		this.topology = {};
+		this.doRefresh = true;
 
-		//console.log('adsdas', sonosIPs);
-		sonosIPs.map(ip => {
-			//	console.log('adsIPdas', ip, this.topology, this.topology === {});
-			// if no topology was found until then, try to find
-			if (this.topologyList.length == 0) {
-				this.getTopology(ip)
-					.subscribe(
-					(tplgy) => {
-						xml2js.parseString(tplgy, (err, result) => {
-							console.log('ttt', result);
+		// we are going to do IP based search and UDP search at the same time, whatever yields results will be used
+		if (sonosIPs.length > 0) this.discoverSonosIP(sonosIPs);
 
-							// search through the xml result tree for the array of zones
-							let itemlist = <Array<Object>>result['ZPSupportInfo']['ZonePlayers'][0]['ZonePlayer'];
+		// start UDP discovery anyway and if IP is found, try to find topology on it, doubling the effort
+		this.discoverSonosUDP();
 
-							this.searchAttempt = 5;
-
-							itemlist.map(item => {
-								//console.log('item', this.topology, this.topologyList);
-
-								let location = <string>item['$']['location'];
-								location = location.replace('http://', '');
-								location = location.replace(':1400/xml/device_description.xml', '');
-
-								if (this.topologyList.indexOf(location) < 0) {
-									this.topologyList.push(location);
-									this.topology[location] = item['$'];
-									this.topology[location]['roomname'] = item['_'];
-									this.topology[location]['ip'] = location;
-								}
-							});
-
-							console.log('Topology object', this.topologyList, this.topology);
-						});
-
-
-					},
-					(error) => {
-						if (this.searchAttempt < 4) {
-							this.searchAttempt += 1;
-							this.discoverSonos();
-						}
-					}
-					);
-			}
-		});
-		// and if that doesn't work, try UDP discovery
+		// start emitting whatever we have
+		this.repeatSonosRefresh();
 	}
 
-	discoverSonos() {
-		//this.UDPService.sendUDPMessage();
-		//this.discoverSonos();
+	repeatSonosRefresh() {
+
+		// refresh all observables
+		this.refreshSonos();
+
+		//and repeat yourself if needed
+		if (this.doRefresh)
+			setTimeout(() => {
+				this.repeatSonosRefresh()
+			}, this.refreshdelay);
+	}
+
+	refreshSonos() {
+		this.emitAllZones();
+		this.emitAllCoordinators();
+		this.emitAllStates();
+	}
+
+//SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
+ //callAPI(sonosaction, sonosip, payload
+	setEQ(eqType, value, IP) {
+		this.callAPI('SetEQ', IP, { '{value}': value});
+	}
+
+	playSonos(IP) {
+		this.callAPI('Play', IP, { });
+	}
+
+	pauseSonos(IP) {
+
+	}
+
+	stopSonos(IP) {
+
+	}
+
+	nextSonos(IP) {
+
+	}
+
+	previousSonos(IP) {
+
+	}
+
+	muteSonos(mute, IP) {
+
+	}
+
+	volumeSonos(volume, IP) {
+
+	}
+
+	getPositionInfo(IP) {
+
+	}
+
+
+	private emitAllZones() {
+
+	}
+
+	private emitAllCoordinators () {
+
+	}
+
+	private emitAllStates() {
+
+	}
+
+	doneSonosService() {
+		// stop pulling data
+		this.doRefresh = false;
+
+		// and finish the streams
+		this.sonoscoordinators.complete();
+		this.sonoszones.complete();
+		this.sonosstates.complete();
 	}
 
 	getSonosZoneObservable() {
@@ -185,30 +225,96 @@ export class SONOSService {
 		return this.sonoscoordinators.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
 	}
 
+	getSonosStateObservable() {
+		return this.sonosstates.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
+	}
+
+	private discoverSonosIP(sonosIPs: Array<string>) {
+
+		//console.log('adsdas', sonosIPs);
+		sonosIPs.map(ip => {
+
+			// if no topology was found until then, try to find
+			if (this.topologyList.length == 0) {
+				this.getTopology(ip)
+					.subscribe(
+					(tplgy) => {
+						xml2js.parseString(tplgy, (err, result) => {
+							//console.log('ttt', result);
+
+							// search through the xml result tree for the array of zones
+							let itemlist = <Array<Object>>result['ZPSupportInfo']['ZonePlayers'][0]['ZonePlayer'];
+
+							itemlist.map(item => {
+
+								//console.log('item', this.topology, this.topologyList);
+								let location = <string>item['$']['location'];
+								location = location.replace('http://', '');
+								location = location.replace(':1400/xml/device_description.xml', '');
+
+								// enrich the object to be store for later usage, if found
+								if (this.topologyList.indexOf(location) < 0) {
+									// add it to the list
+									this.topologyList.push(location);
+
+									// add some fields
+									this.topology[location] = item['$'];
+									this.topology[location]['roomname'] = item['_'];
+									this.topology[location]['ip'] = location;
+
+									// and get some more device related data
+									this.getDeviceDescription(location)
+										.subscribe(value => {
+											xml2js.parseString(value, (err, result) => {
+												this.topology[location]['devicedata'] = result
+											})
+										});
+								} // end if
+							});
+
+							console.log('Topology object', this.topologyList, this.topology);
+						});
+					},
+					(error) => {
+						console.log('Error checking topology');
+					}
+					);
+			}
+		});
+	}
+
+	private discoverSonosUDP() {
+		// another attempt
+		//this.searchAttempt += 1;
+
+		// search data
+		let SONOS_SEARCHSTRING = 'M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: ssdp:discover\r\nMX: 1\r\nST: urn:schemas-upnp-org:device:ZonePlayer:1';
+		let PORT = 1900;
+		let multicastaddresses = ['239.255.255.250', '255.255.255.255'];
+
+		///sendUDPMessage(message: string, port: number, addresses: Array<string>, ttl: number, timetolisten: number) {
+		this.UDPService.sendUDPMessage(SONOS_SEARCHSTRING, PORT, multicastaddresses, 2, 5000)
+			.subscribe(value => {
+				console.log('recevied udp data', value);
+
+				// if data is received, then it contains an IP which can be used to find topology
+				if (typeof value['error'] === 'undefined')
+					this.discoverSonosIP([<string>value['ip']]);
+			});
+	}
 
 	private getTopology(ip: string) {
 		let SOAPurl = 'http://' + ip + ':1400/status/topology';
 
-		//	console.log("sdsda", SOAPurl);
+		return this.http.get(SOAPurl)
+			.map(res => res.text())
+	}
+
+	private getDeviceDescription(ip: string) {
+		let SOAPurl = 'http://' + ip + ':1400/xml/device_description.xml';
 
 		return this.http.get(SOAPurl)
-			//.map(res => res.json())
 			.map(res => res.text())
-		//.flatMap(res=> { return Observable.fromPromise(xml2js.parseString(res))})
-		//.mergeMap(res => xml2js.parseString(res));
-		/*
-
-		 .flatMap(res=>{
-					return Observable.fromPromise(this.getJSON(res.text()))
-			})
-		{
-			console.log('Get topssssoology', res, res.text());
-			xml2js.parseString(res.text(), (err, result) => {
-				console.log('saasas', result);
-				return result;
-			})
-		});
-		*/
 	}
 
 	// 
@@ -220,6 +326,7 @@ export class SONOSService {
 		// do a search-replace of all the update data available and then do the HTTP request
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
+
 		console.log('SOAPbody', + SOAPbody);
 
 		// here the full SOAP call
@@ -289,206 +396,4 @@ export class SONOSService {
 		USN: uuid:2f402f80-da50-11e1-9b23-00178829d301
 //		let UPNPALL_SEARCHSTRING = "M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 5\r\nST: ssdp:all\r\n\r\n";
 //		let UPNPROOTDEVICE_SEARCHSTRING = "M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 5\r\nST: upnp:rootdevice\r\n\r\n";
-
-
-//http://192.168.178.43:1400/xml/device_description.xml
-	
-	This XML file does not appear to have any style information associated with it. The document tree is shown below.
-<root xmlns="urn:schemas-upnp-org:device-1-0">
-<specVersion>
-<major>1</major>
-<minor>0</minor>
-</specVersion>
-<device>
-<deviceType>urn:schemas-upnp-org:device:ZonePlayer:1</deviceType>
-<friendlyName>192.168.178.43 - Sonos PLAY:1</friendlyName>
-<manufacturer>Sonos, Inc.</manufacturer>
-<manufacturerURL>http://www.sonos.com</manufacturerURL>
-<modelNumber>S12</modelNumber>
-<modelDescription>Sonos PLAY:1</modelDescription>
-<modelName>Sonos PLAY:1</modelName>
-<modelURL>http://www.sonos.com/products/zoneplayers/S12</modelURL>
-<softwareVersion>34.16-37101</softwareVersion>
-<hardwareVersion>1.20.1.6-2</hardwareVersion>
-<serialNum>9AKDLKSDSLKAJ</serialNum>
-<UDN>uuid:RINCON_9asdasdsadsds0</UDN>
-<iconList>
-<icon>
-<id>0</id>
-<mimetype>image/png</mimetype>
-<width>48</width>
-<height>48</height>
-<depth>24</depth>
-<url>/img/icon-S12.png</url>
-</icon>
-</iconList>
-<minCompatibleVersion>33.0-00000</minCompatibleVersion>
-<legacyCompatibleVersion>25.0-00000</legacyCompatibleVersion>
-<displayVersion>7.1</displayVersion>
-<extraVersion/>
-<roomName>asdasdsaze</roomName>
-<displayName>PLAY:1</displayName>
-<zoneType>14</zoneType>
-<feature1>0x00000000</feature1>
-<feature2>0x00403332</feature2>
-<feature3>0x0001000e</feature3>
-<variant>1</variant>
-<internalSpeakerSize>5</internalSpeakerSize>
-<bassExtension>75.000</bassExtension>
-<satGainOffset>6.000</satGainOffset>
-<memory>256</memory>
-<flash>256</flash>
-<ampOnTime>10</ampOnTime>
-<serviceList>
-<service>
-<serviceType>urn:schemas-upnp-org:service:AlarmClock:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:AlarmClock</serviceId>
-<controlURL>/AlarmClock/Control</controlURL>
-<eventSubURL>/AlarmClock/Event</eventSubURL>
-<SCPDURL>/xml/AlarmClock1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:MusicServices:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:MusicServices</serviceId>
-<controlURL>/MusicServices/Control</controlURL>
-<eventSubURL>/MusicServices/Event</eventSubURL>
-<SCPDURL>/xml/MusicServices1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:DeviceProperties:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:DeviceProperties</serviceId>
-<controlURL>/DeviceProperties/Control</controlURL>
-<eventSubURL>/DeviceProperties/Event</eventSubURL>
-<SCPDURL>/xml/DeviceProperties1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:SystemProperties:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:SystemProperties</serviceId>
-<controlURL>/SystemProperties/Control</controlURL>
-<eventSubURL>/SystemProperties/Event</eventSubURL>
-<SCPDURL>/xml/SystemProperties1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:ZoneGroupTopology:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:ZoneGroupTopology</serviceId>
-<controlURL>/ZoneGroupTopology/Control</controlURL>
-<eventSubURL>/ZoneGroupTopology/Event</eventSubURL>
-<SCPDURL>/xml/ZoneGroupTopology1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:GroupManagement:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:GroupManagement</serviceId>
-<controlURL>/GroupManagement/Control</controlURL>
-<eventSubURL>/GroupManagement/Event</eventSubURL>
-<SCPDURL>/xml/GroupManagement1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-tencent-com:service:QPlay:1</serviceType>
-<serviceId>urn:tencent-com:serviceId:QPlay</serviceId>
-<controlURL>/QPlay/Control</controlURL>
-<eventSubURL>/QPlay/Event</eventSubURL>
-<SCPDURL>/xml/QPlay1.xml</SCPDURL>
-</service>
-</serviceList>
-<deviceList>
-<device>
-<deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>
-<friendlyName>192.168.178.43 - Sonos PLAY:1 Media Server</friendlyName>
-<manufacturer>Sonos, Inc.</manufacturer>
-<manufacturerURL>http://www.sonos.com</manufacturerURL>
-<modelNumber>S12</modelNumber>
-<modelDescription>Sonos PLAY:1 Media Server</modelDescription>
-<modelName>Sonos PLAY:1</modelName>
-<modelURL>http://www.sonos.com/products/zoneplayers/S12</modelURL>
-<UDN>uuid:RINCON_94fasadasdsa00_MS</UDN>
-<serviceList>
-<service>
-<serviceType>urn:schemas-upnp-org:service:ContentDirectory:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:ContentDirectory</serviceId>
-<controlURL>/MediaServer/ContentDirectory/Control</controlURL>
-<eventSubURL>/MediaServer/ContentDirectory/Event</eventSubURL>
-<SCPDURL>/xml/ContentDirectory1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
-<controlURL>/MediaServer/ConnectionManager/Control</controlURL>
-<eventSubURL>/MediaServer/ConnectionManager/Event</eventSubURL>
-<SCPDURL>/xml/ConnectionManager1.xml</SCPDURL>
-</service>
-</serviceList>
-</device>
-<device>
-<deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
-<friendlyName>Suze - Sonos PLAY:1 Media Renderer</friendlyName>
-<manufacturer>Sonos, Inc.</manufacturer>
-<manufacturerURL>http://www.sonos.com</manufacturerURL>
-<modelNumber>S12</modelNumber>
-<modelDescription>Sonos PLAY:1 Media Renderer</modelDescription>
-<modelName>Sonos PLAY:1</modelName>
-<modelURL>http://www.sonos.com/products/zoneplayers/S12</modelURL>
-<UDN>uuid:RINCON_949asdasdsadsdas_MR</UDN>
-<serviceList>
-<service>
-<serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
-<controlURL>/MediaRenderer/RenderingControl/Control</controlURL>
-<eventSubURL>/MediaRenderer/RenderingControl/Event</eventSubURL>
-<SCPDURL>/xml/RenderingControl1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
-<controlURL>/MediaRenderer/ConnectionManager/Control</controlURL>
-<eventSubURL>/MediaRenderer/ConnectionManager/Event</eventSubURL>
-<SCPDURL>/xml/ConnectionManager1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
-<serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
-<controlURL>/MediaRenderer/AVTransport/Control</controlURL>
-<eventSubURL>/MediaRenderer/AVTransport/Event</eventSubURL>
-<SCPDURL>/xml/AVTransport1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>urn:schemas-sonos-com:service:Queue:1</serviceType>
-<serviceId>urn:sonos-com:serviceId:Queue</serviceId>
-<controlURL>/MediaRenderer/Queue/Control</controlURL>
-<eventSubURL>/MediaRenderer/Queue/Event</eventSubURL>
-<SCPDURL>/xml/Queue1.xml</SCPDURL>
-</service>
-<service>
-<serviceType>
-urn:schemas-upnp-org:service:GroupRenderingControl:1
-</serviceType>
-<serviceId>urn:upnp-org:serviceId:GroupRenderingControl</serviceId>
-<controlURL>/MediaRenderer/GroupRenderingControl/Control</controlURL>
-<eventSubURL>/MediaRenderer/GroupRenderingControl/Event</eventSubURL>
-<SCPDURL>/xml/GroupRenderingControl1.xml</SCPDURL>
-</service>
-</serviceList>
-<X_Rhapsody-Extension xmlns="http://www.real.com/rhapsody/xmlns/upnp-1-0">
-<deviceID>
-urn:rhapsody-real-com:device-id-1-0:sonos_1:RINCON_949sdasdsdasdas
-</deviceID>
-<deviceCapabilities>
-<interactionPattern type="real-rhapsody-upnp-1-0"/>
-</deviceCapabilities>
-</X_Rhapsody-Extension>
-<qq:X_QPlay_SoftwareCapability xmlns:qq="http://www.tencent.com">QPlay:2</qq:X_QPlay_SoftwareCapability>
-<iconList>
-<icon>
-<mimetype>image/png</mimetype>
-<width>48</width>
-<height>48</height>
-<depth>24</depth>
-<url>/img/icon-S12.png</url>
-</icon>
-</iconList>
-</device>
-</deviceList>
-</device>
-</root>
-
-
-		*/
+*/

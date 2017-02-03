@@ -1,5 +1,5 @@
-# Angular2 SONOS Service demonstration
-Sonos service which deploys Observable technique to watch for changes, creating great async usage.
+# Angular 2 SONOS Service demonstration
+Sonos service in Angular2 which deploys Observable technique to watch for changes, creating great async usage.
 
 Including API calls to control the Sonos.
 

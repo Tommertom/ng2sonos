@@ -14,9 +14,9 @@
       <ion-input type="text" [(ngModel)]="settings.server"></ion-input>
     </ion-item>
     <ion-item>
-      <h2>Number of devices found : {{deviceList.length}} </h2>
-      <p *ngIf="deviceList.length>0"> Go to menu to see the devices found</p>
+      <h2>Number of zones found : {{deviceList.length}} </h2>
+      <p *ngIf="deviceList.length>0"> Go to menu to see the sonos zones and stuff found</p>
     </ion-item>
   </ion-list>
-  <button ion-button full (click)="startObserving()">Start observing devices</button>
+  <button ion-button full (click)="startObserving()">Start observing Sonos</button>
 </ion-content>
