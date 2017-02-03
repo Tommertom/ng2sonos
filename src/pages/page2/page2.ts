@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ToastController, NavController } from 'ionic-angular';
-import { DomoticzService } from './../../providers/domoticz.provider';
+import { SONOSService } from './../../providers/sonos.provider';
 
 
 @Component({
@@ -16,7 +16,7 @@ export class Page2 {
 
   constructor(
     public navCtrl: NavController,
-    public domoticzService: DomoticzService,
+    public sonosService: SONOSService,
     private toastCtrl: ToastController
   ) { }
 
@@ -34,53 +34,27 @@ export class Page2 {
     }
 
     // and start observing again
-    this.deviceSubscription = this.domoticzService.getDomoticzDeviceObservable()
+    this.deviceSubscription = this.sonosService.getSonosZoneObservable()
       .subscribe(
       value => {
 
         // if the device is already found, then don't add it
-        if (this.deviceList.indexOf(value['idx']) == -1) this.deviceList.push(value['idx']);
+        if (this.deviceList.indexOf(value['ip']) == -1) this.deviceList.push(value['ip']);
 
         // and replace the data
-        this.deviceData[value['idx']] = value;
+        let ip = value['ip'];
+        this.deviceData[ip] = value;
+
+        //console.log('stuff', value['device_description']['iconList'][0]['icon'][0]['url'][0] ); //['device_description']
+
+        // complete some of the data for the view
+        this.deviceData[ip]['iconurl'] = 'http://' + ip + ':1400' + value['device_description']['iconList'][0]['icon'][0]['url'][0];
+        // console.log('stuff', this.deviceData[value['ip']]['iconurl']);
       },
 
       error => console.log(error),
       () => console.log('Finished')
       );
-  }
-
-  isDimmable(device) {
-    return (device['HaveDimmer'] == true) && (device['MaxDimLevel'] != 0)
-  }
-
-  canToggle(device) {
-    return (device['SwitchType'] == 'On/Off');
-  }
-
-  canSetTemp(device) {
-    return (device['SubType'] == "SetPoint");
-  }
-
-  doToggle(idx) {
-    console.log('Toggle', idx);
-    this.domoticzService.toggleDevice(idx);
-  }
-
-doOnOff(event,idx) {
-  console.log('On/off', event, event.checked, idx);
-  if (event.checked) this.domoticzService.switchDeviceOn(idx)
-  else this.domoticzService.switchSceneOff(idx);
-}
-
-  doLevelChange(event, idx) {
-    console.log('levelchange', event, idx, this.deviceList);
-    this.domoticzService.setDeviceDimLevel(idx, event.value);
-  }
-
-  doSetPointChange(event, idx) {
-    console.log('setpointchange', event, idx, this.deviceList);
-    this.domoticzService.setDeviceSetPoint(idx, event.value);
   }
 
   /**

@@ -7,6 +7,11 @@ import { Http, Headers } from '@angular/http';
 
 import { UDPService } from './udp.provider';
 
+export interface SonosSettingsModel {
+    sonosIPs: Array<string>;    // IP adress of sonos zones known
+    refreshdelay: number;       // the ms to wait before a full refresh
+}
+
 // package install 
 //npm install xml2js --save
 //npm install -g typings
@@ -109,7 +114,7 @@ export class SONOSService {
 
 	private sonosIPs: Array<string> = [];
 	private doRefresh: boolean = false;
-	private refreshdelay: number = 1000;
+	private refreshdelay: number = 5000;
 
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
@@ -156,14 +161,14 @@ export class SONOSService {
 		this.emitAllStates();
 	}
 
-//SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
- //callAPI(sonosaction, sonosip, payload
+	//SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
+	//callAPI(sonosaction, sonosip, payload
 	setEQ(eqType, value, IP) {
-		this.callAPI('SetEQ', IP, { '{value}': value});
+		this.callAPI('SetEQ', IP, { '{value}': value });
 	}
 
 	playSonos(IP) {
-		this.callAPI('Play', IP, { });
+		this.callAPI('Play', IP, {});
 	}
 
 	pauseSonos(IP) {
@@ -194,13 +199,22 @@ export class SONOSService {
 
 	}
 
-
 	private emitAllZones() {
-
+		this.topologyList.map(ip => {
+			if (typeof this.topology[ip] !== 'undefined')
+				this.sonoszones.next(this.topology[ip]);
+		});
 	}
 
-	private emitAllCoordinators () {
+	private emitAllCoordinators() {
+		this.topologyList.map(ip => {
+			if (typeof this.topology[ip] !== 'undefined') {
+				//console.log('test',this.topology[ip]['coordinator'], this.topology[ip]['coordinator'] == "true");
+				if (this.topology[ip]['coordinator'] == "true")
+			this.sonoscoordinators.next(this.topology[ip]); 
+		}
 
+		});
 	}
 
 	private emitAllStates() {
@@ -268,15 +282,14 @@ export class SONOSService {
 											xml2js.parseString(value, (err, result) => {
 												this.topology[location]['device_description'] = result['root']['device'][0];
 
-												if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
+												//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
 											})
 										});
 								} // end if
 							});
 
-							console.log('Topology object', this.topologyList, this.topology);
+							//console.log('Topology object', this.topologyList, this.topology);
 
-							
 						});
 					},
 					(error) => {

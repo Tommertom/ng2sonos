@@ -7,30 +7,23 @@
   </ion-navbar>
 </ion-header>
 <ion-content>
-  <ion-card *ngFor="let idx of deviceList">
-    <ion-card-header>{{ deviceData[idx].Name}} - {{ deviceData[idx].Data}}
-      <span *ngIf="isDimmable(deviceData[idx])">
-            - {{deviceData[idx].Level}}
-          </span>
-    </ion-card-header>
+  <ion-card *ngFor="let ip of deviceList">
     <ion-card-content>
-      <button ion-button full *ngIf="canToggle(deviceData[idx])" (click)="doToggle(idx)">Let's toggle</button>
+      <ion-avatar item-left>
+      </ion-avatar>
       <ion-list>
         <ion-item>
-          <ion-label>Switch on or off</ion-label>
-          <ion-toggle *ngIf="canToggle(deviceData[idx])" [checked]="deviceData[idx].Data=='On'" (ionChange)="doOnOff($event,idx)"></ion-toggle>
+          <ion-avatar item-left>
+            <img [src]="deviceData[ip].iconurl">
+          </ion-avatar>
+          <h1>{{ deviceData[ip].roomname}}</h1>
+          <p>{{ deviceData[ip].uuid}}</p>
         </ion-item>
       </ion-list>
-      <ion-range *ngIf="isDimmable(deviceData[idx])" [(ngModel)]="deviceData[idx].Level" (ionChange)="doLevelChange($event, idx)"
-        debounce="1000" min="15" max="deviceData[idx].MaxDimLevel">
-        <ion-label range-left>0</ion-label>
-        <ion-label range-right>{{deviceData[idx].MaxDimLevel}}</ion-label>
-        </ion-range>
-        <ion-range *ngIf="canSetTemp(deviceData[idx])" [(ngModel)]="deviceData[idx].SetPoint" (ionChange)="doSetPointChange($event, idx)"
-          debounce="1000" min="15" max="deviceData[idx].MaxDimLevel">
-          <ion-label range-left>0</ion-label>
-          <ion-label range-right>{{deviceData[idx].MaxDimLevel}}</ion-label>
-          </ion-range>
+      <button ion-button full (click)="doToggle(ip)">Play</button>
+      <button ion-button full (click)="doToggle(ip)">Stop</button>
+      <button ion-button full (click)="doToggle(ip)">Volume UP</button>
+      <button ion-button full (click)="doToggle(ip)">Volume Down</button>
     </ion-card-content>
   </ion-card>
   <ion-card *ngIf="deviceList.length == 0">

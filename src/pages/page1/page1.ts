@@ -3,11 +3,6 @@ import { NavController, ToastController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
 import { Observable } from 'rxjs/Observable';
 
-const defaultSettings = {
-  server: '192.168.178.22',
-  refreshdelay: 50000
-};
-
 @Component({
   selector: 'page-page1',
   templateUrl: 'page1.html'
@@ -17,9 +12,10 @@ export class Page1 {
   deviceList: Array<string> = [];
   deviceData: Object = {};
   //  idxList: Array<number> = [];
+  sonosip: string = '192.168.178.22';
 
   deviceSubscription: any;
-  settings = defaultSettings;
+  // settings = defaultSettings;
 
   constructor(
     public navCtrl: NavController,
@@ -32,8 +28,8 @@ export class Page1 {
   }
 
   startObserving() {
-    this.sonosService.initService([this.settings.server]);
-    
+    this.sonosService.initService([this.sonosip]);
+
     // set the initial list
     this.deviceList = [];
 
@@ -47,21 +43,22 @@ export class Page1 {
     this.deviceSubscription = this.sonosService.getSonosZoneObservable()
       .subscribe(
       value => {
+        //console.log('value received', value);
 
         // if the device is already found, then don't add it
         if (typeof value['error'] === 'undefined')
-        { if (this.deviceList.indexOf(value['idx']) == -1) this.deviceList.push(value['idx']); }
+        { if (this.deviceList.indexOf(value['ip']) == -1) this.deviceList.push(value['ip']); }
         // if an error is received, we kill the watcher and need to do something smart
         else {
           console.log('Error received', value);
           //this.sonosService.doneDomoticzService();
           this.deviceSubscription.unsubscribe();
 
-          this.doToast('There was an issue accessing the Domoticz server');
+          this.doToast('There was an issue accessing SONOS server');
         }
 
         // and replace the data
-        this.deviceData[value['idx']] = value;
+        this.deviceData[value['ip']] = value;
       },
 
       error => console.log(error));
@@ -80,7 +77,7 @@ export class Page1 {
     });
 
     toast.onDidDismiss(() => {
-//      console.log('Dismissed toast');
+      //      console.log('Dismissed toast');
     });
 
     toast.present();
