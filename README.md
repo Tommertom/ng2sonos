@@ -115,7 +115,7 @@ Zone/Coordinator:
       "1.20.1.6-2"
     ],
     "serialNum": [
-      "94-9F-3E-72-5C-D6:6"
+      "XX-XX-XX-XX-XX-XX:6"
     ],
     "UDN": [
       "uuid:RINCON_XXXXXXXXX01400"
@@ -571,7 +571,42 @@ Zone/Coordinator:
     ]
   }
 }
+```
 
+device_description summary (taken from device_description.xml):
+```
+UDN : Array[1]
+ampOnTime : Array[1]
+bassExtension : Array[1]
+deviceList : Array[1]
+deviceType : Array[1]
+displayName : Array[1]
+displayVersion : Array[1]
+extraVersion : Array[1]
+feature1 : Array[1]
+feature2 : Array[1]
+feature3 : Array[1]
+flash : Array[1]
+friendlyName : Array[1]
+hardwareVersion : Array[1]
+iconList : Array[1]
+internalSpeakerSize : Array[1]
+legacyCompatibleVersion : Array[1]
+manufacturer : Array[1]
+manufacturerURL : Array[1]
+memory : Array[1]
+minCompatibleVersion : Array[1]
+modelDescription : Array[1]
+modelName : Array[1]
+modelNumber : Array[1]
+modelURL : Array[1]
+roomName : Array[1]
+satGainOffset : Array[1]
+serialNum : Array[1]
+serviceList : Array[1]
+softwareVersion : Array[1]
+variant : Array[1]
+zoneType : Array[1]
 ```
 
 State:
