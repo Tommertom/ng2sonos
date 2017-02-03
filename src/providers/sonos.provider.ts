@@ -266,9 +266,9 @@ export class SONOSService {
 									this.getDeviceDescription(location)
 										.subscribe(value => {
 											xml2js.parseString(value, (err, result) => {
-												this.topology[location]['devicedata'] = result;
+												this.topology[location]['device_description'] = result['root']['device'][0];
 
-												if (location == "192.168.178.43") console.log('ssds', JSON.stringify(this.topology["192.168.178.43"],null,2));
+												if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"], JSON.stringify(this.topology["192.168.178.43"],null,2));
 											})
 										});
 								} // end if

@@ -66,8 +66,9 @@ Provided under Apache2 License.
 
 Zone/Coordinator:
 ```
+
 {
-  "group": "RINCON_949F3E725CD601400:0",
+  "group": "RINCON_898976SADSSS601400:0",
   "coordinator": "true",
   "wirelessmode": "1",
   "wirelessleafonly": "0",
@@ -80,8 +81,8 @@ Zone/Coordinator:
   "mincompatibleversion": "33.0-00000",
   "legacycompatibleversion": "25.0-00000",
   "bootseq": "4",
-  "uuid": "RINCON_949F3E725CD601400",
-  "roomname": "Suze",
+  "uuid": "RINCON_898976SADSSS601400",
+  "roomname": "Kitchen",
   "ip": "192.168.178.43",
   "devicedata": {
     "root": {
@@ -90,504 +91,509 @@ Zone/Coordinator:
       },
       "specVersion": [
         {
-          "major": [
-            "1"
-          ],
-          "minor": [
-            "0"
-          ]
-        }
-      ],
-      "device": [
-        {
-          "deviceType": [
-            "urn:schemas-upnp-org:device:ZonePlayer:1"
-          ],
-          "friendlyName": [
-            "192.168.178.43 - Sonos PLAY:1"
-          ],
-          "manufacturer": [
-            "Sonos, Inc."
-          ],
-          "manufacturerURL": [
-            "http://www.sonos.com"
-          ],
-          "modelNumber": [
-            "S12"
-          ],
-          "modelDescription": [
-            "Sonos PLAY:1"
-          ],
-          "modelName": [
-            "Sonos PLAY:1"
-          ],
-          "modelURL": [
-            "http://www.sonos.com/products/zoneplayers/S12"
-          ],
-          "softwareVersion": [
-            "34.16-37101"
-          ],
-          "hardwareVersion": [
-            "1.20.1.6-2"
-          ],
-          "serialNum": [
-            "94-9F-3E-72-5C-D6:6"
-          ],
-          "UDN": [
-            "uuid:RINCON_949F3E725CD601400"
-          ],
-          "iconList": [
-            {
-              "icon": [
-                {
-                  "id": [
-                    "0"
-                  ],
-                  "mimetype": [
-                    "image/png"
-                  ],
-                  "width": [
-                    "48"
-                  ],
-                  "height": [
-                    "48"
-                  ],
-                  "depth": [
-                    "24"
-                  ],
-                  "url": [
-                    "/img/icon-S12.png"
-                  ]
-                }
-              ]
-            }
-          ],
-          "minCompatibleVersion": [
-            "33.0-00000"
-          ],
-          "legacyCompatibleVersion": [
-            "25.0-00000"
-          ],
-          "displayVersion": [
-            "7.1"
-          ],
-          "extraVersion": [
-            ""
-          ],
-          "roomName": [
-            "Suze"
-          ],
-          "displayName": [
-            "PLAY:1"
-          ],
-          "zoneType": [
-            "14"
-          ],
-          "feature1": [
-            "0x00000000"
-          ],
-          "feature2": [
-            "0x00403332"
-          ],
-          "feature3": [
-            "0x0001000e"
-          ],
-          "variant": [
-            "1"
-          ],
-          "internalSpeakerSize": [
-            "5"
-          ],
-          "bassExtension": [
-            "75.000"
-          ],
-          "satGainOffset": [
-            "6.000"
-          ],
-          "memory": [
-            "256"
-          ],
-          "flash": [
-            "256"
-          ],
-          "ampOnTime": [
-            "10"
-          ],
-          "serviceList": [
-            {
-              "service": [
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:AlarmClock:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:AlarmClock"
-                  ],
-                  "controlURL": [
-                    "/AlarmClock/Control"
-                  ],
-                  "eventSubURL": [
-                    "/AlarmClock/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/AlarmClock1.xml"
-                  ]
+  {
+  "group": "RINCON_898976SADSSS601400:0",
+  "coordinator": "true",
+  "wirelessmode": "1",
+  "wirelessleafonly": "0",
+  "hasconfiguredssid": "1",
+  "channelfreq": "2437",
+  "behindwifiext": "0",
+  "wifienabled": "1",
+  "location": "http://192.168.178.43:1400/xml/device_description.xml",
+  "version": "34.16-37101",
+  "mincompatibleversion": "33.0-00000",
+  "legacycompatibleversion": "25.0-00000",
+  "bootseq": "4",
+  "uuid": "RINCON_898976SADSSS601400",
+  "roomname": "Kitchen",
+  "ip": "192.168.178.43",
+  "device_description": {
+    "deviceType": [
+      "urn:schemas-upnp-org:device:ZonePlayer:1"
+    ],
+    "friendlyName": [
+      "192.168.178.43 - Sonos PLAY:1"
+    ],
+    "manufacturer": [
+      "Sonos, Inc."
+    ],
+    "manufacturerURL": [
+      "http://www.sonos.com"
+    ],
+    "modelNumber": [
+      "S12"
+    ],
+    "modelDescription": [
+      "Sonos PLAY:1"
+    ],
+    "modelName": [
+      "Sonos PLAY:1"
+    ],
+    "modelURL": [
+      "http://www.sonos.com/products/zoneplayers/S12"
+    ],
+    "softwareVersion": [
+      "34.16-37101"
+    ],
+    "hardwareVersion": [
+      "1.20.1.6-2"
+    ],
+    "serialNum": [
+      "94-9F-3E-72-5C-D6:6"
+    ],
+    "UDN": [
+      "uuid:RINCON_898976SADSSS601400"
+    ],
+    "iconList": [
+      {
+        "icon": [
+          {
+            "id": [
+              "0"
+            ],
+            "mimetype": [
+              "image/png"
+            ],
+            "width": [
+              "48"
+            ],
+            "height": [
+              "48"
+            ],
+            "depth": [
+              "24"
+            ],
+            "url": [
+              "/img/icon-S12.png"
+            ]
+          }
+        ]
+      }
+    ],
+    "minCompatibleVersion": [
+      "33.0-00000"
+    ],
+    "legacyCompatibleVersion": [
+      "25.0-00000"
+    ],
+    "displayVersion": [
+      "7.1"
+    ],
+    "extraVersion": [
+      ""
+    ],
+    "roomName": [
+      "Kitchen"
+    ],
+    "displayName": [
+      "PLAY:1"
+    ],
+    "zoneType": [
+      "14"
+    ],
+    "feature1": [
+      "0x00000000"
+    ],
+    "feature2": [
+      "0x00403332"
+    ],
+    "feature3": [
+      "0x0001000e"
+    ],
+    "variant": [
+      "1"
+    ],
+    "internalSpeakerSize": [
+      "5"
+    ],
+    "bassExtension": [
+      "75.000"
+    ],
+    "satGainOffset": [
+      "6.000"
+    ],
+    "memory": [
+      "256"
+    ],
+    "flash": [
+      "256"
+    ],
+    "ampOnTime": [
+      "10"
+    ],
+    "serviceList": [
+      {
+        "service": [
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:AlarmClock:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:AlarmClock"
+            ],
+            "controlURL": [
+              "/AlarmClock/Control"
+            ],
+            "eventSubURL": [
+              "/AlarmClock/Event"
+            ],
+            "SCPDURL": [
+              "/xml/AlarmClock1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:MusicServices:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:MusicServices"
+            ],
+            "controlURL": [
+              "/MusicServices/Control"
+            ],
+            "eventSubURL": [
+              "/MusicServices/Event"
+            ],
+            "SCPDURL": [
+              "/xml/MusicServices1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:DeviceProperties:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:DeviceProperties"
+            ],
+            "controlURL": [
+              "/DeviceProperties/Control"
+            ],
+            "eventSubURL": [
+              "/DeviceProperties/Event"
+            ],
+            "SCPDURL": [
+              "/xml/DeviceProperties1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:SystemProperties:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:SystemProperties"
+            ],
+            "controlURL": [
+              "/SystemProperties/Control"
+            ],
+            "eventSubURL": [
+              "/SystemProperties/Event"
+            ],
+            "SCPDURL": [
+              "/xml/SystemProperties1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:ZoneGroupTopology:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:ZoneGroupTopology"
+            ],
+            "controlURL": [
+              "/ZoneGroupTopology/Control"
+            ],
+            "eventSubURL": [
+              "/ZoneGroupTopology/Event"
+            ],
+            "SCPDURL": [
+              "/xml/ZoneGroupTopology1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-upnp-org:service:GroupManagement:1"
+            ],
+            "serviceId": [
+              "urn:upnp-org:serviceId:GroupManagement"
+            ],
+            "controlURL": [
+              "/GroupManagement/Control"
+            ],
+            "eventSubURL": [
+              "/GroupManagement/Event"
+            ],
+            "SCPDURL": [
+              "/xml/GroupManagement1.xml"
+            ]
+          },
+          {
+            "serviceType": [
+              "urn:schemas-tencent-com:service:QPlay:1"
+            ],
+            "serviceId": [
+              "urn:tencent-com:serviceId:QPlay"
+            ],
+            "controlURL": [
+              "/QPlay/Control"
+            ],
+            "eventSubURL": [
+              "/QPlay/Event"
+            ],
+            "SCPDURL": [
+              "/xml/QPlay1.xml"
+            ]
+          }
+        ]
+      }
+    ],
+    "deviceList": [
+      {
+        "device": [
+          {
+            "deviceType": [
+              "urn:schemas-upnp-org:device:MediaServer:1"
+            ],
+            "friendlyName": [
+              "192.168.178.43 - Sonos PLAY:1 Media Server"
+            ],
+            "manufacturer": [
+              "Sonos, Inc."
+            ],
+            "manufacturerURL": [
+              "http://www.sonos.com"
+            ],
+            "modelNumber": [
+              "S12"
+            ],
+            "modelDescription": [
+              "Sonos PLAY:1 Media Server"
+            ],
+            "modelName": [
+              "Sonos PLAY:1"
+            ],
+            "modelURL": [
+              "http://www.sonos.com/products/zoneplayers/S12"
+            ],
+            "UDN": [
+              "uuid:RINCON_898976SADSSS601400_MS"
+            ],
+            "serviceList": [
+              {
+                "service": [
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:ContentDirectory:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:ContentDirectory"
+                    ],
+                    "controlURL": [
+                      "/MediaServer/ContentDirectory/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaServer/ContentDirectory/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/ContentDirectory1.xml"
+                    ]
+                  },
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:ConnectionManager:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:ConnectionManager"
+                    ],
+                    "controlURL": [
+                      "/MediaServer/ConnectionManager/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaServer/ConnectionManager/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/ConnectionManager1.xml"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "deviceType": [
+              "urn:schemas-upnp-org:device:MediaRenderer:1"
+            ],
+            "friendlyName": [
+              "Kitchen - Sonos PLAY:1 Media Renderer"
+            ],
+            "manufacturer": [
+              "Sonos, Inc."
+            ],
+            "manufacturerURL": [
+              "http://www.sonos.com"
+            ],
+            "modelNumber": [
+              "S12"
+            ],
+            "modelDescription": [
+              "Sonos PLAY:1 Media Renderer"
+            ],
+            "modelName": [
+              "Sonos PLAY:1"
+            ],
+            "modelURL": [
+              "http://www.sonos.com/products/zoneplayers/S12"
+            ],
+            "UDN": [
+              "uuid:RINCON_898976SADSSS601400_MR"
+            ],
+            "serviceList": [
+              {
+                "service": [
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:RenderingControl:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:RenderingControl"
+                    ],
+                    "controlURL": [
+                      "/MediaRenderer/RenderingControl/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaRenderer/RenderingControl/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/RenderingControl1.xml"
+                    ]
+                  },
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:ConnectionManager:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:ConnectionManager"
+                    ],
+                    "controlURL": [
+                      "/MediaRenderer/ConnectionManager/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaRenderer/ConnectionManager/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/ConnectionManager1.xml"
+                    ]
+                  },
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:AVTransport:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:AVTransport"
+                    ],
+                    "controlURL": [
+                      "/MediaRenderer/AVTransport/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaRenderer/AVTransport/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/AVTransport1.xml"
+                    ]
+                  },
+                  {
+                    "serviceType": [
+                      "urn:schemas-sonos-com:service:Queue:1"
+                    ],
+                    "serviceId": [
+                      "urn:sonos-com:serviceId:Queue"
+                    ],
+                    "controlURL": [
+                      "/MediaRenderer/Queue/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaRenderer/Queue/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/Queue1.xml"
+                    ]
+                  },
+                  {
+                    "serviceType": [
+                      "urn:schemas-upnp-org:service:GroupRenderingControl:1"
+                    ],
+                    "serviceId": [
+                      "urn:upnp-org:serviceId:GroupRenderingControl"
+                    ],
+                    "controlURL": [
+                      "/MediaRenderer/GroupRenderingControl/Control"
+                    ],
+                    "eventSubURL": [
+                      "/MediaRenderer/GroupRenderingControl/Event"
+                    ],
+                    "SCPDURL": [
+                      "/xml/GroupRenderingControl1.xml"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "X_Rhapsody-Extension": [
+              {
+                "$": {
+                  "xmlns": "http://www.real.com/rhapsody/xmlns/upnp-1-0"
                 },
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:MusicServices:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:MusicServices"
-                  ],
-                  "controlURL": [
-                    "/MusicServices/Control"
-                  ],
-                  "eventSubURL": [
-                    "/MusicServices/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/MusicServices1.xml"
-                  ]
-                },
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:DeviceProperties:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:DeviceProperties"
-                  ],
-                  "controlURL": [
-                    "/DeviceProperties/Control"
-                  ],
-                  "eventSubURL": [
-                    "/DeviceProperties/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/DeviceProperties1.xml"
-                  ]
-                },
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:SystemProperties:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:SystemProperties"
-                  ],
-                  "controlURL": [
-                    "/SystemProperties/Control"
-                  ],
-                  "eventSubURL": [
-                    "/SystemProperties/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/SystemProperties1.xml"
-                  ]
-                },
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:ZoneGroupTopology:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:ZoneGroupTopology"
-                  ],
-                  "controlURL": [
-                    "/ZoneGroupTopology/Control"
-                  ],
-                  "eventSubURL": [
-                    "/ZoneGroupTopology/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/ZoneGroupTopology1.xml"
-                  ]
-                },
-                {
-                  "serviceType": [
-                    "urn:schemas-upnp-org:service:GroupManagement:1"
-                  ],
-                  "serviceId": [
-                    "urn:upnp-org:serviceId:GroupManagement"
-                  ],
-                  "controlURL": [
-                    "/GroupManagement/Control"
-                  ],
-                  "eventSubURL": [
-                    "/GroupManagement/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/GroupManagement1.xml"
-                  ]
-                },
-                {
-                  "serviceType": [
-                    "urn:schemas-tencent-com:service:QPlay:1"
-                  ],
-                  "serviceId": [
-                    "urn:tencent-com:serviceId:QPlay"
-                  ],
-                  "controlURL": [
-                    "/QPlay/Control"
-                  ],
-                  "eventSubURL": [
-                    "/QPlay/Event"
-                  ],
-                  "SCPDURL": [
-                    "/xml/QPlay1.xml"
-                  ]
-                }
-              ]
-            }
-          ],
-          "deviceList": [
-            {
-              "device": [
-                {
-                  "deviceType": [
-                    "urn:schemas-upnp-org:device:MediaServer:1"
-                  ],
-                  "friendlyName": [
-                    "192.168.178.43 - Sonos PLAY:1 Media Server"
-                  ],
-                  "manufacturer": [
-                    "Sonos, Inc."
-                  ],
-                  "manufacturerURL": [
-                    "http://www.sonos.com"
-                  ],
-                  "modelNumber": [
-                    "S12"
-                  ],
-                  "modelDescription": [
-                    "Sonos PLAY:1 Media Server"
-                  ],
-                  "modelName": [
-                    "Sonos PLAY:1"
-                  ],
-                  "modelURL": [
-                    "http://www.sonos.com/products/zoneplayers/S12"
-                  ],
-                  "UDN": [
-                    "uuid:RINCON_949F3E725CD601400_MS"
-                  ],
-                  "serviceList": [
-                    {
-                      "service": [
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:ContentDirectory:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:ContentDirectory"
-                          ],
-                          "controlURL": [
-                            "/MediaServer/ContentDirectory/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaServer/ContentDirectory/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/ContentDirectory1.xml"
-                          ]
-                        },
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:ConnectionManager:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:ConnectionManager"
-                          ],
-                          "controlURL": [
-                            "/MediaServer/ConnectionManager/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaServer/ConnectionManager/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/ConnectionManager1.xml"
-                          ]
+                "deviceID": [
+                  "urn:rhapsody-real-com:device-id-1-0:sonos_1:RINCON_898976SADSSS601400"
+                ],
+                "deviceCapabilities": [
+                  {
+                    "interactionPattern": [
+                      {
+                        "$": {
+                          "type": "real-rhapsody-upnp-1-0"
                         }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "deviceType": [
-                    "urn:schemas-upnp-org:device:MediaRenderer:1"
-                  ],
-                  "friendlyName": [
-                    "Suze - Sonos PLAY:1 Media Renderer"
-                  ],
-                  "manufacturer": [
-                    "Sonos, Inc."
-                  ],
-                  "manufacturerURL": [
-                    "http://www.sonos.com"
-                  ],
-                  "modelNumber": [
-                    "S12"
-                  ],
-                  "modelDescription": [
-                    "Sonos PLAY:1 Media Renderer"
-                  ],
-                  "modelName": [
-                    "Sonos PLAY:1"
-                  ],
-                  "modelURL": [
-                    "http://www.sonos.com/products/zoneplayers/S12"
-                  ],
-                  "UDN": [
-                    "uuid:RINCON_949F3E725CD601400_MR"
-                  ],
-                  "serviceList": [
-                    {
-                      "service": [
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:RenderingControl:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:RenderingControl"
-                          ],
-                          "controlURL": [
-                            "/MediaRenderer/RenderingControl/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaRenderer/RenderingControl/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/RenderingControl1.xml"
-                          ]
-                        },
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:ConnectionManager:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:ConnectionManager"
-                          ],
-                          "controlURL": [
-                            "/MediaRenderer/ConnectionManager/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaRenderer/ConnectionManager/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/ConnectionManager1.xml"
-                          ]
-                        },
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:AVTransport:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:AVTransport"
-                          ],
-                          "controlURL": [
-                            "/MediaRenderer/AVTransport/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaRenderer/AVTransport/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/AVTransport1.xml"
-                          ]
-                        },
-                        {
-                          "serviceType": [
-                            "urn:schemas-sonos-com:service:Queue:1"
-                          ],
-                          "serviceId": [
-                            "urn:sonos-com:serviceId:Queue"
-                          ],
-                          "controlURL": [
-                            "/MediaRenderer/Queue/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaRenderer/Queue/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/Queue1.xml"
-                          ]
-                        },
-                        {
-                          "serviceType": [
-                            "urn:schemas-upnp-org:service:GroupRenderingControl:1"
-                          ],
-                          "serviceId": [
-                            "urn:upnp-org:serviceId:GroupRenderingControl"
-                          ],
-                          "controlURL": [
-                            "/MediaRenderer/GroupRenderingControl/Control"
-                          ],
-                          "eventSubURL": [
-                            "/MediaRenderer/GroupRenderingControl/Event"
-                          ],
-                          "SCPDURL": [
-                            "/xml/GroupRenderingControl1.xml"
-                          ]
-                        }
-                      ]
-                    }
-                  ],
-                  "X_Rhapsody-Extension": [
-                    {
-                      "$": {
-                        "xmlns": "http://www.real.com/rhapsody/xmlns/upnp-1-0"
-                      },
-                      "deviceID": [
-                        "urn:rhapsody-real-com:device-id-1-0:sonos_1:RINCON_949F3E725CD601400"
-                      ],
-                      "deviceCapabilities": [
-                        {
-                          "interactionPattern": [
-                            {
-                              "$": {
-                                "type": "real-rhapsody-upnp-1-0"
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ],
-                  "qq:X_QPlay_SoftwareCapability": [
-                    {
-                      "_": "QPlay:2",
-                      "$": {
-                        "xmlns:qq": "http://www.tencent.com"
                       }
-                    }
-                  ],
-                  "iconList": [
-                    {
-                      "icon": [
-                        {
-                          "mimetype": [
-                            "image/png"
-                          ],
-                          "width": [
-                            "48"
-                          ],
-                          "height": [
-                            "48"
-                          ],
-                          "depth": [
-                            "24"
-                          ],
-                          "url": [
-                            "/img/icon-S12.png"
-                          ]
-                        }
-                      ]
-                    }
-                  ]
+                    ]
+                  }
+                ]
+              }
+            ],
+            "qq:X_QPlay_SoftwareCapability": [
+              {
+                "_": "QPlay:2",
+                "$": {
+                  "xmlns:qq": "http://www.tencent.com"
                 }
-              ]
-            }
-          ]
-        }
-      ]
-    }
+              }
+            ],
+            "iconList": [
+              {
+                "icon": [
+                  {
+                    "mimetype": [
+                      "image/png"
+                    ],
+                    "width": [
+                      "48"
+                    ],
+                    "height": [
+                      "48"
+                    ],
+                    "depth": [
+                      "24"
+                    ],
+                    "url": [
+                      "/img/icon-S12.png"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
 
