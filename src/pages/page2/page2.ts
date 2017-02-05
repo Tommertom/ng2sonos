@@ -4,6 +4,8 @@ import { SONOSService } from './../../providers/sonos.provider';
 
 import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
 
+import * as xml2js from "xml2js"
+
 @Component({
   selector: 'page-page2',
   templateUrl: 'page2.html'
@@ -45,7 +47,11 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
-        console.log('zoneinfo', val);
+
+        xml2js.parseString(val, (err, result) => {
+							 console.log('zoneinfo', result);
+						})
+       
       });
   }
 
