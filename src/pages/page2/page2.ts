@@ -30,7 +30,7 @@ export class Page2 {
   getPositionInfo(ip) {
     this.sonosService.getPositionInfo(ip)
       .subscribe(val => {
-       // this.doToast('posinfo' + JSON.stringify(val, null, 2));
+        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
       });
   }
@@ -39,7 +39,22 @@ export class Page2 {
     this.sonosService.volumeSonos('20', ip);
   }
 
+  zoneInfo(ip) {
+    this.sonosService.getZoneInfo(ip)
+      .subscribe(val => {
+        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
 
+  getVolume(ip) {
+    this.sonosService.getZoneVolume(ip)
+      .subscribe(val => {
+        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
+  
   volumeDown(ip) {
     this.sonosService.volumeSonos('5', ip);
   }

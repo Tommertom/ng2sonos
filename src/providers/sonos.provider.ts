@@ -11,7 +11,8 @@ import { UDPService } from './udp.provider';
 
 export interface SonosSettingsModel {
 	sonosIPs: Array<string>;    // IP adress of sonos zones known
-	refreshdelay: number;       // the ms to wait before a full refresh
+	refreshdelayTopology: number;       // the ms to wait before a full refresh
+	refreshdelayPositionInfo: number;       // the ms to wait before a full refresh
 }
 
 // package install 
@@ -21,6 +22,7 @@ export interface SonosSettingsModel {
 import * as xml2js from "xml2js"
 
 // taken from https://github.com/jishi/node-sonos-http-api
+// and https://github.com/bencevans/node-sonos.git 
 const SONOSSoapActions = {
 	SetEQ: 'urn:schemas-upnp-org:service:RenderingControl:1#SetEQ',
 	Play: 'urn:schemas-upnp-org:service:AVTransport:1#Play',
@@ -39,7 +41,7 @@ const SONOSSoapActions = {
 	SaveQueue: 'urn:schemas-upnp-org:service:AVTransport:1#SaveQueue',
 	SetPlayMode: 'urn:schemas-upnp-org:service:AVTransport:1#SetPlayMode',
 	SetCrossfadeMode: 'urn:schemas-upnp-org:service:AVTransport:1#SetCrossfadeMode',
-	GetPositionInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo',
+	GetPositionInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo', 
 	ConfigureSleepTimer: 'urn:schemas-upnp-org:service:AVTransport:1#ConfigureSleepTimer',
 	SetAVTransportURI: 'urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI',
 	Browse: 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse',
@@ -47,7 +49,12 @@ const SONOSSoapActions = {
 	RefreshShareIndex: 'urn:schemas-upnp-org:service:ContentDirectory:1#RefreshShareIndex',
 	AddURIToQueue: 'urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue',
 	AddMultipleURIsToQueue: 'urn:schemas-upnp-org:service:AVTransport:1#AddMultipleURIsToQueue',
-	ListAvailableServices: 'urn:schemas-upnp-org:service:MusicServices:1#ListAvailableServices'
+	ListAvailableServices: 'urn:schemas-upnp-org:service:MusicServices:1#ListAvailableServices',
+
+	// below from BenCEvans
+	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
+	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume'
+	
 };
 
 const SONOSSOAPTemplates = {
@@ -76,7 +83,11 @@ const SONOSSOAPTemplates = {
 	RefreshShareIndex: '<u:RefreshShareIndex xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><AlbumArtistDisplayOption></AlbumArtistDisplayOption></u:RefreshShareIndex>',
 	AddURIToQueue: '<u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><EnqueuedURI>{uri}</EnqueuedURI><EnqueuedURIMetaData>{metadata}</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>{desiredFirstTrackNumberEnqueued}</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>{enqueueAsNext}</EnqueueAsNext></u:AddURIToQueue>',
 	AddMultipleURIsToQueue: '<u:AddMultipleURIsToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><UpdateID>0</UpdateID><NumberOfURIs>{amount}</NumberOfURIs><EnqueuedURIs>{uris}</EnqueuedURIs><EnqueuedURIsMetaData>{metadatas}</EnqueuedURIsMetaData><ContainerURI>{containerURI}</ContainerURI><ContainerMetaData>{containerMetadata}</ContainerMetaData><DesiredFirstTrackNumberEnqueued>{desiredFirstTrackNumberEnqueued}</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>{enqueueAsNext}</EnqueueAsNext></u:AddMultipleURIsToQueue>',
-	ListAvailableServices: '<u:ListAvailableServices xmlns:u="urn:schemas-upnp-org:service:MusicServices:1"></u:ListAvailableServices>'
+	ListAvailableServices: '<u:ListAvailableServices xmlns:u="urn:schemas-upnp-org:service:MusicServices:1"></u:ListAvailableServices>',
+
+	// From BenCEvans
+	GetZoneInfo: '<u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo>',
+	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>'
 };
 
 const SONOSSoapURLs = {
@@ -105,7 +116,11 @@ const SONOSSoapURLs = {
 	RefreshShareIndex: '/MediaRenderer/ContentDirectory/Control',
 	AddURIToQueue: '/MediaRenderer/AVTransport/Control',
 	AddMultipleURIsToQueue: '/MediaRenderer/AVTransport/Control',
-	ListAvailableServices: '/MediaRenderer/MusicServices/Control'
+	ListAvailableServices: '/MediaRenderer/MusicServices/Control',
+
+	// From BenCEvans
+	GetZoneInfo: '/DeviceProperties/Control',
+	GetVolume: '/MediaRenderer/AVTransport/Control'
 };
 
 @Injectable()
@@ -121,6 +136,8 @@ export class SONOSService {
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonosstates: BehaviorSubject<Object> = new BehaviorSubject({});
+	private sonospositioninfo: BehaviorSubject<Object> = new BehaviorSubject({});
+
 
 	// mag weg
 	debugInfo: string = '';
@@ -128,80 +145,11 @@ export class SONOSService {
 	constructor(
 		private UDPService: UDPService,
 		private http: Http,
-		private toastCtrl: ToastController
+		private toastCtrl: ToastController //remove, silly to do a toast in a service
 	) { };
 
 
-
-
-	muteOrUnMute() {
-
-		var url, soapBody, soapAction;
-
-		//volume
-		url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
-
-		// for play/pause
-		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
-
-		// onderstaande werken (volume set)
-		soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume";
-		soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
-
-		console.log('s2', ('http://192.168.178.18:1400' + SONOSSoapURLs['Volume'] == url));
-		console.log('s1', (SONOSSoapActions['Volume'] == soapAction));
-		console.log('s4', (SONOSSOAPTemplates['Volume'].replace('{volume}', '30') == soapBody));
-		console.log('s5', SONOSSOAPTemplates['Volume'].replace('{volume}', '30'));
-		console.log('s55', soapBody);
-
-		// hier gebleven : waarom zijn de soaptemplates niet gelijk aan body?
-		//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
-		//<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
-		//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
-		//</s:Body></s:Envelope>
-		//
-
-		// dit werkt nog niet
-		//soapAction = this.SoapActions.Play;
-		//soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>'
-		//	+ this.TEMPLATES.Play + '</s:Body></s:Envelope>';
-
-		//https://forum.ionicframework.com/t/how-convert-xml-input-file-to-json/40759/12
-
-		// aan het uitproberen
-		//	soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Speed>1</Speed></u:Play></s:Body></s:Envelope>';
-		//	soapAction = 'urn:schemas-upnp-org:service:AVTransport:1#Play';
-
-
-		//this.sendSoapRequest(url, soapBody, soapAction);
-
-		let xml = soapBody;
-
-		//	}
-
-		//http://stackoverflow.com/questions/33660712/angularjs-post-fails-response-for-preflight-has-invalid-http-status-code-404
-		//http://stackoverflow.com/questions/36258959/cors-enabled-but-response-for-preflight-has-invalid-http-status-code-404-when-po
-		//http://stackoverflow.com/questions/38881964/angular-2-token-response-for-preflight-has-invalid-http-status-code-400
-
-		//	sendSoapRequest(url, xml, soapAction) {
-		this.debugInfo = ''; //xml+url;
-
-		let headers = new Headers({ 'Content-Type': 'text/xml;charset=utf-8' });
-		//let headers = new Headers({ 'Content-Type': 'text/plain' });
-		headers.append('SOAPACTION', soapAction);
-		//	headers.append('CONTENT-LENGTH', xml.length);
-		headers.append('type', 'stream');
-
-		let options = new RequestOptions({ method: RequestMethod.Post, headers: headers });
-
-		var response = this.http.post(url, xml, options)
-			.subscribe(result => {
-				this.debugInfo = this.debugInfo + "--" + JSON.stringify(result);
-			}, error => { this.debugInfo = JSON.stringify(error); });
-	}
-
-
-
+	//remove, silly to do a toast in a service
 	/**
 	 * Do a toast message.
 	 * 
@@ -241,7 +189,9 @@ export class SONOSService {
 
 
 		// sasdas
-		let val = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+		let val = `
+
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
 <s:Body>
     <u:GetPositionInfoResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
         <Track>14</Track>
@@ -268,30 +218,70 @@ export class SONOSService {
     <AbsCount>2147483647</AbsCount>
 </u:GetPositionInfoResponse>
 </s:Body>
-</s:Envelope>`;
+</s:Envelope>
 
-
-	// clear the text
-/*
-	val = val.replace('<u:', '<');
-	val = val.replace('<\/u:', '</');
-
-	val = val.replace('<s:', '<');
-	val = val.replace('<\/s:', '</');
-
-	val = val.replace('<upnp:', '<');
-	val = val.replace('<\/upnp:', '</');
-*/
-	
-console.log('val ', val);
+		`;
 
 		xml2js.parseString(val, (err, result) => {
-			console.log('result xml', result);
+			//console.log('result xml', result);
 
 			//									this.doToast('psuh location' + JSON.stringify(this.topology[location]['device_description'], null, 2));
 			//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
+
+			console.log('sss', result);
+
+			//			let base = result['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
+			//			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
+
+			console.log('object', result, this.makePositionInfoObject(result));
 		})
 
+	}
+
+	makePositionInfoObject(data) {
+		let base = data['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
+
+
+		let returnobject = {};
+
+		// empty meta data or not?
+		if (typeof base['TrackMetaData'][0]['DIDL-Lite'] !== 'undefined') {
+
+			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
+
+			returnobject = {
+				'Track': base['Track'][0],
+				'TrackDuration': base['TrackDuration'][0],
+				'TrackURI': base['TrackURI'][0],
+				'title': metadata['dc:title'][0],
+				'class': metadata['upnp:class'][0],
+				'creator': metadata['dc:creator'][0],
+				'album': metadata['upnp:album'][0],
+				'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
+				'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
+				'albumArtist': metadata['r:albumArtist'][0],
+				'streamContent': metadata['r:streamContent'][0],
+				'TrackMetaData': true
+			}
+		} else {
+			returnobject = {
+				'Track': base['Track'][0],
+				'TrackDuration': base['TrackDuration'][0],
+				'TrackURI': base['TrackURI'][0],
+				'TrackMetaData': false
+				//'title': metadata['dc:title'][0],
+				//	'class': metadata['upnp:class'][0],
+				//'creator': metadata['dc:creator'][0],
+				//'album': metadata['upnp:album'][0],
+				//'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
+				//	'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
+				//	'albumArtist': metadata['r:albumArtist'][0],
+				//	'streamContent': metadata['r:streamContent'][0]
+			}
+
+		}
+
+		return returnobject;
 	}
 
 	repeatSonosRefresh() {
@@ -315,8 +305,6 @@ console.log('val ', val);
 		this.emitAllStates();
 	}
 
-	//SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
-	//callAPI(sonosaction, sonosip, payload
 	setEQ(eqType, value, IP) {
 		this.callAPI('SetEQ', IP, { '{value}': value });
 	}
@@ -325,27 +313,19 @@ console.log('val ', val);
 		this.callAPI('Play', IP, {});
 	}
 
-
-
-
 	pauseSonos(IP) {
-
 	}
 
 	stopSonos(IP) {
-
 	}
 
 	nextSonos(IP) {
-
 	}
 
 	previousSonos(IP) {
-
 	}
 
 	muteSonos(mute, IP) {
-
 	}
 
 	private emitAllZones() {
@@ -356,6 +336,7 @@ console.log('val ', val);
 		});
 	}
 
+	// change into filter on Zones
 	private emitAllCoordinators() {
 		this.topologyList.map(ip => {
 			if (typeof this.topology[ip] !== 'undefined') {
@@ -368,7 +349,6 @@ console.log('val ', val);
 	}
 
 	private emitAllStates() {
-
 	}
 
 	doneSonosService() {
@@ -498,15 +478,22 @@ console.log('val ', val);
 	}
 
 
-
 	volumeSonos(volume, IP) {
 		this.callAPI('Volume', IP, { '{volume}': volume })
 			.subscribe(val => { console.log('volume', val); });
 	}
 
+	getZoneInfo(IP) {
+		return this.callAPI('GetZoneInfo', IP, {})
+	}
 
 	getPositionInfo(IP) {
 		return this.callAPI('GetPositionInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+getZoneVolume(IP) {
+		return this.callAPI('GetVolume', IP, {})
 		//	.subscribe(val => { console.log('getpos', val); });
 	}
 
@@ -571,6 +558,55 @@ console.log('val ', val);
 						})
 					});*/
 	}
+
+
+	// REMOVE
+
+	muteOrUnMute() {
+
+		var url, soapBody, soapAction;
+
+		//volume
+		url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
+
+		// for play/pause
+		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
+
+		// onderstaande werken (volume set)
+		soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume";
+		soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
+
+		//console.log('s2', ('http://192.168.178.18:1400' + SONOSSoapURLs['Volume'] == url));
+		//console.log('s1', (SONOSSoapActions['Volume'] == soapAction));
+		//console.log('s4', (SONOSSOAPTemplates['Volume'].replace('{volume}', '30') == soapBody));
+		//console.log('s5', SONOSSOAPTemplates['Volume'].replace('{volume}', '30'));
+		//console.log('s55', soapBody);
+
+		let xml = soapBody;
+
+		//http://stackoverflow.com/questions/33660712/angularjs-post-fails-response-for-preflight-has-invalid-http-status-code-404
+		//http://stackoverflow.com/questions/36258959/cors-enabled-but-response-for-preflight-has-invalid-http-status-code-404-when-po
+		//http://stackoverflow.com/questions/38881964/angular-2-token-response-for-preflight-has-invalid-http-status-code-400
+
+		//	sendSoapRequest(url, xml, soapAction) {
+		this.debugInfo = ''; //xml+url;
+
+		let headers = new Headers({ 'Content-Type': 'text/xml;charset=utf-8' });
+		//let headers = new Headers({ 'Content-Type': 'text/plain' });
+		headers.append('SOAPACTION', soapAction);
+		//	headers.append('CONTENT-LENGTH', xml.length);
+		headers.append('type', 'stream');
+
+		let options = new RequestOptions({ method: RequestMethod.Post, headers: headers });
+
+		var response = this.http.post(url, xml, options)
+			.subscribe(result => {
+				this.debugInfo = this.debugInfo + "--" + JSON.stringify(result);
+			}, error => { this.debugInfo = JSON.stringify(error); });
+	}
+
+
+
 
 }
 
