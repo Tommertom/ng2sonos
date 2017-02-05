@@ -73,7 +73,6 @@ export class Page2 {
       });
   }
 
-
   volumeDown(ip) {
     this.sonosService.volumeSonos('5', ip);
   }

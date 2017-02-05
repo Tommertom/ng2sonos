@@ -54,6 +54,7 @@ const SONOSSoapActions = {
 	// below from BenCEvans
 	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
 	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
+
 	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo'
 };
 
@@ -240,51 +241,7 @@ export class SONOSService {
 
 	}
 
-	makePositionInfoObject(data) {
-		let base = data['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
 
-
-		let returnobject = {};
-
-		// empty meta data or not?
-		if (typeof base['TrackMetaData'][0]['DIDL-Lite'] !== 'undefined') {
-
-			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
-
-			returnobject = {
-				'Track': base['Track'][0],
-				'TrackDuration': base['TrackDuration'][0],
-				'TrackURI': base['TrackURI'][0],
-				'title': metadata['dc:title'][0],
-				'class': metadata['upnp:class'][0],
-				'creator': metadata['dc:creator'][0],
-				'album': metadata['upnp:album'][0],
-				'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
-				'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
-				'albumArtist': metadata['r:albumArtist'][0],
-				'streamContent': metadata['r:streamContent'][0],
-				'TrackMetaData': true
-			}
-		} else {
-			returnobject = {
-				'Track': base['Track'][0],
-				'TrackDuration': base['TrackDuration'][0],
-				'TrackURI': base['TrackURI'][0],
-				'TrackMetaData': false
-				//'title': metadata['dc:title'][0],
-				//	'class': metadata['upnp:class'][0],
-				//'creator': metadata['dc:creator'][0],
-				//'album': metadata['upnp:album'][0],
-				//'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
-				//	'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
-				//	'albumArtist': metadata['r:albumArtist'][0],
-				//	'streamContent': metadata['r:streamContent'][0]
-			}
-
-		}
-
-		return returnobject;
-	}
 
 	repeatSonosRefresh() {
 
@@ -328,6 +285,148 @@ export class SONOSService {
 	}
 
 	muteSonos(mute, IP) {
+	}
+
+
+	volumeSonos(volume, IP) {
+		this.callAPI('Volume', IP, { '{volume}': volume })
+			.subscribe(val => { console.log('volume', val); });
+	}
+
+	getZoneInfo(IP) {
+		return this.callAPI('GetZoneInfo', IP, {})
+	}
+
+	getPositionInfo(IP) {
+		return this.callAPI('GetPositionInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+	getTransportInfo(IP) {
+		return this.callAPI('GetTransportInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+	getZoneVolume(IP) {
+		return this.callAPI('GetVolume', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+	// 
+	private callAPI(sonosaction, sonosip, payload) {
+		let SOAPbody: string = SONOSSOAPTemplates[sonosaction];
+		let SOAPaction: string = SONOSSoapActions[sonosaction];
+		let SOAPurl: string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
+
+		//console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
+
+		// do a search-replace of all the update data available and then do the HTTP request
+		for (var key in payload)
+			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
+
+		// add the preface and closing tags
+		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>`
+			+ SOAPbody + `</s:Body></s:Envelope>`;
+
+		//console.log('SOAPbody', SOAPbody);
+		console.log('API1 call ' + SOAPbody);
+		console.log('API2 call ' + SOAPaction);
+		console.log('API3 call ' + SOAPurl);
+
+		// here the full SOAP call
+		let headers = new Headers({ 'Content-Type': 'text/xml' });
+		headers.append('SOAPACTION', SOAPaction);
+		headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
+		headers.append('type', 'stream');
+
+		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
+			.do(x => {
+
+				console.log('raw', x,'dd', x.text(),'\n\nsssss',x.toString());
+				xml2js.parseString(x.text(), (err, result) => {
+					console.log('received value ', result);
+					console.log('json', JSON.stringify(result, null, 2));
+
+					console.log('makepos', this.makePositionInfoObject(result));
+				})
+			})
+			.map(res => res.text())
+		/*			.map(res => {
+		
+						this.doToast('API3 result ' + res);
+		
+						xml2js.parseString(res, (err, result) => {
+							return result;
+						})
+					});*/
+	}
+
+	makePositionInfoObject(data) {
+
+
+		function isArray(item) {
+			return (Object.prototype.toString.call(item) === '[object Array]')
+		}
+
+		/**
+		 * Parse DIDL into track structure
+		 * @param  {String} didl
+		 * @return {object}
+		 
+		function parseDIDL(didl) {
+			if ((!didl) || (!didl['DIDL-Lite']) || (!isArray(didl['DIDL-Lite'].item)) || (!didl['DIDL-Lite'].item[0])) return {}
+			var item = didl['DIDL-Lite'].item[0]
+			return {
+				title: isArray(item['dc:title']) ? item['dc:title'][0] : null,
+				artist: isArray(item['dc:creator']) ? item['dc:creator'][0] : null,
+				album: isArray(item['upnp:album']) ? item['upnp:album'][0] : null,
+				albumArtURI: isArray(item['upnp:albumArtURI']) ? item['upnp:albumArtURI'][0] : null
+			}
+		}
+*/
+		let base = data['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
+
+		console.log('Trying to make out of', data);
+		let returnobject = {};
+
+		// empty meta data or not?
+		if (typeof base['TrackMetaData'][0]['DIDL-Lite'] !== 'undefined') {
+
+			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
+
+			returnobject = {
+				'Track': base['Track'][0],
+				'TrackDuration': base['TrackDuration'][0],
+				'TrackURI': base['TrackURI'][0],
+				'title': metadata['dc:title'][0],
+				'class': metadata['upnp:class'][0],
+				'creator': metadata['dc:creator'][0],
+				'album': metadata['upnp:album'][0],
+				'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
+				'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
+				'albumArtist': metadata['r:albumArtist'][0],
+				'streamContent': metadata['r:streamContent'][0],
+				'TrackMetaData': true
+			}
+		} else {
+			returnobject = {
+				'Track': base['Track'][0],
+				'TrackDuration': base['TrackDuration'][0],
+				'TrackURI': base['TrackURI'][0],
+				'TrackMetaData': false
+				//'title': metadata['dc:title'][0],
+				//	'class': metadata['upnp:class'][0],
+				//'creator': metadata['dc:creator'][0],
+				//'album': metadata['upnp:album'][0],
+				//'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
+				//	'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
+				//	'albumArtist': metadata['r:albumArtist'][0],
+				//	'streamContent': metadata['r:streamContent'][0]
+			}
+
+		}
+
+		return returnobject;
 	}
 
 	private emitAllZones() {
@@ -477,92 +576,6 @@ export class SONOSService {
 
 		return this.http.get(SOAPurl)
 			.map(res => res.text())
-	}
-
-
-	volumeSonos(volume, IP) {
-		this.callAPI('Volume', IP, { '{volume}': volume })
-			.subscribe(val => { console.log('volume', val); });
-	}
-
-	getZoneInfo(IP) {
-		return this.callAPI('GetZoneInfo', IP, {})
-	}
-
-	getPositionInfo(IP) {
-		return this.callAPI('GetPositionInfo', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
-	}
-
-	getTransportInfo(IP) {
-		return this.callAPI('GetTransportInfo', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
-	}
-
-	getZoneVolume(IP) {
-		return this.callAPI('GetVolume', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
-	}
-
-	// 
-	private callAPI(sonosaction, sonosip, payload) {
-		let SOAPbody: string = SONOSSOAPTemplates[sonosaction];
-		let SOAPaction: string = SONOSSoapActions[sonosaction];
-		let SOAPurl: string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
-
-		//console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
-
-		// do a search-replace of all the update data available and then do the HTTP request
-		for (var key in payload)
-			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
-
-		// add the preface and closing tags
-		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>`
-			+ SOAPbody + `</s:Body></s:Envelope>`;
-
-		//console.log('SOAPbody', SOAPbody);
-
-
-		//this.doToast('API1 call ' + SOAPbody);
-		//this.doToast('API2 call ' + SOAPaction);
-		//this.doToast('API3 call ' + SOAPurl);
-
-		// here the full SOAP call
-		let headers = new Headers({ 'Content-Type': 'text/xml' });
-		headers.append('SOAPACTION', SOAPaction);
-		headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
-		headers.append('type', 'stream');
-
-		//this.doToast('API sending');
-
-		//let url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
-
-		// for play/pause
-		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
-
-		// onderstaande werken (volume set)
-		//let soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume	";
-		//	let soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
-
-
-
-		//let options = new RequestOptions( {method: RequestMethod.Post, headers: headers });
-
-		//console.log( 'sss', headers, options);
-		//var response = this.http.post(url, xml, options)
-
-
-		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
-
-			.map(res => res.text())
-		/*			.map(res => {
-		
-						this.doToast('API3 result ' + res);
-		
-						xml2js.parseString(res, (err, result) => {
-							return result;
-						})
-					});*/
 	}
 
 
