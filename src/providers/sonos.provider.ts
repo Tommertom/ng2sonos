@@ -41,7 +41,7 @@ const SONOSSoapActions = {
 	SaveQueue: 'urn:schemas-upnp-org:service:AVTransport:1#SaveQueue',
 	SetPlayMode: 'urn:schemas-upnp-org:service:AVTransport:1#SetPlayMode',
 	SetCrossfadeMode: 'urn:schemas-upnp-org:service:AVTransport:1#SetCrossfadeMode',
-	GetPositionInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo', 
+	GetPositionInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo',
 	ConfigureSleepTimer: 'urn:schemas-upnp-org:service:AVTransport:1#ConfigureSleepTimer',
 	SetAVTransportURI: 'urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI',
 	Browse: 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse',
@@ -53,8 +53,8 @@ const SONOSSoapActions = {
 
 	// below from BenCEvans
 	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
-	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume'
-	
+	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
+	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo'
 };
 
 const SONOSSOAPTemplates = {
@@ -86,6 +86,7 @@ const SONOSSOAPTemplates = {
 	ListAvailableServices: '<u:ListAvailableServices xmlns:u="urn:schemas-upnp-org:service:MusicServices:1"></u:ListAvailableServices>',
 
 	// From BenCEvans
+	GetTransportInfo: '<u:GetTransportInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetTransportInfo>',
 	GetZoneInfo: '<u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo>',
 	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>'
 };
@@ -119,6 +120,7 @@ const SONOSSoapURLs = {
 	ListAvailableServices: '/MediaRenderer/MusicServices/Control',
 
 	// From BenCEvans
+	GetTransportInfo: '/MediaRenderer/AVTransport/Control',
 	GetZoneInfo: '/DeviceProperties/Control',
 	GetVolume: '/MediaRenderer/AVTransport/Control'
 };
@@ -492,7 +494,12 @@ export class SONOSService {
 		//	.subscribe(val => { console.log('getpos', val); });
 	}
 
-getZoneVolume(IP) {
+	getTransportInfo(IP) {
+		return this.callAPI('GetTransportInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+	getZoneVolume(IP) {
 		return this.callAPI('GetVolume', IP, {})
 		//	.subscribe(val => { console.log('getpos', val); });
 	}

@@ -54,7 +54,17 @@ export class Page2 {
         this.debugInfo = JSON.stringify(val, null, 2);
       });
   }
-  
+
+
+  getTransportInfo(IP) {
+    this.sonosService.getTransportInfo(ip)
+      .subscribe(val => {
+        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
+
+
   volumeDown(ip) {
     this.sonosService.volumeSonos('5', ip);
   }
