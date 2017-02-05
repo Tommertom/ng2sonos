@@ -32,6 +32,7 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
+        console.log('positioninfo', val);
       });
   }
 
@@ -44,6 +45,7 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
+        console.log('zoneinfo', val);
       });
   }
 
