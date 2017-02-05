@@ -516,7 +516,6 @@ export class SONOSService {
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
 
-
 		// add the preface and closing tags
 		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>`
 			+ SOAPbody + `</s:Body></s:Envelope>`;

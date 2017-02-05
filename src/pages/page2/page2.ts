@@ -56,11 +56,12 @@ export class Page2 {
   }
 
 
-  getTransportInfo(IP) {
+  getTransportInfo(ip) {
     this.sonosService.getTransportInfo(ip)
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
+        console.log('transortinfo', val);
       });
   }
 
