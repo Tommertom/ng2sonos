@@ -6,9 +6,13 @@
     <ion-title>Domoticz Devices</ion-title>
   </ion-navbar>
 </ion-header>
-<ion-content>
+<ion-content class="page-page2">
   <ion-card>
     <pre>
+
+      
+      <ion-textarea class='selectable' rows="10" [(ngModel)]="debugInfo"></ion-textarea>
+
       {{debugInfo}}
     </pre>
   </ion-card>
@@ -25,8 +29,8 @@
       </ion-list>
       <button ion-button full (click)="getPositionInfo(ip)">Play</button>
       <button ion-button full (click)="volumeUp(ip)">Stop</button>
-      <button ion-button full (click)="getPositionInfo(ip)">Volume UP</button>
-      <button ion-button full (click)="muteOrUnMute()">Volume Down</button>
+      <button ion-button full (click)="volumeUp(ip)">Volume UP</button>
+      <button ion-button full (click)="volumeDown(ip)">Volume Down</button>
     </ion-card-content>
   </ion-card>
   <ion-card *ngIf="deviceList.length == 0">

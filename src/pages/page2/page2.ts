@@ -29,11 +29,19 @@ export class Page2 {
 
   getPositionInfo(ip) {
     this.sonosService.getPositionInfo(ip)
-      .subscribe(val => { this.doToast('posinfo' + JSON.stringify(val, null, 2)) });
+      .subscribe(val => {
+       // this.doToast('posinfo' + JSON.stringify(val, null, 2));
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
   }
 
   volumeUp(ip) {
     this.sonosService.volumeSonos('20', ip);
+  }
+
+
+  volumeDown(ip) {
+    this.sonosService.volumeSonos('5', ip);
   }
 
   muteOrUnMute() {

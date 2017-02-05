@@ -155,11 +155,11 @@ export class SONOSService {
 		console.log('s55', soapBody);
 
 		// hier gebleven : waarom zijn de soaptemplates niet gelijk aan body?
-//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
-//<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
-//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
-//</s:Body></s:Envelope>
-//
+		//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
+		//<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
+		//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
+		//</s:Body></s:Envelope>
+		//
 
 		// dit werkt nog niet
 		//soapAction = this.SoapActions.Play;
@@ -238,6 +238,60 @@ export class SONOSService {
 
 		// start emitting whatever we have
 		this.repeatSonosRefresh();
+
+
+		// sasdas
+		let val = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+<s:Body>
+    <u:GetPositionInfoResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+        <Track>14</Track>
+        <TrackDuration>0:02:17</TrackDuration>
+        <TrackMetaData>
+            <DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+            <item id="-1" parentID="-1" restricted="true">
+                <res protocolInfo="x-file-cifs:*:audio/mpeg:*" duration="0:04:27">x-file-cifs://RASPBERRYPI/Folder/Music/Land.mp3</res>
+                <r:streamContent/>
+                <dc:title>Land</dc:title>
+                <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+                <dc:creator>
+                </dc:creator>
+                <upnp:album>Music</upnp:album>
+                <upnp:originalTrackNumber>14</upnp:originalTrackNumber>
+                <r:albumArtist>Music </r:albumArtist>
+            </item>
+        </DIDL-Lite>
+    </TrackMetaData>
+    <TrackURI>x-file-cifs://RASPBERRYPI/Folder/Music/Land.mp3</TrackURI>
+    <RelTime>0:04:10</RelTime>
+    <AbsTime>NOT_IMPLEMENTED</AbsTime>
+    <RelCount>2147483647</RelCount>
+    <AbsCount>2147483647</AbsCount>
+</u:GetPositionInfoResponse>
+</s:Body>
+</s:Envelope>`;
+
+
+	// clear the text
+/*
+	val = val.replace('<u:', '<');
+	val = val.replace('<\/u:', '</');
+
+	val = val.replace('<s:', '<');
+	val = val.replace('<\/s:', '</');
+
+	val = val.replace('<upnp:', '<');
+	val = val.replace('<\/upnp:', '</');
+*/
+	
+console.log('val ', val);
+
+		xml2js.parseString(val, (err, result) => {
+			console.log('result xml', result);
+
+			//									this.doToast('psuh location' + JSON.stringify(this.topology[location]['device_description'], null, 2));
+			//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
+		})
+
 	}
 
 	repeatSonosRefresh() {
@@ -246,7 +300,7 @@ export class SONOSService {
 		this.refreshSonos();
 
 		// remove in later stage
-	//	this.doToast('Refreshing data');
+		//	this.doToast('Refreshing data');
 
 		//and repeat yourself if needed
 		if (this.doRefresh)
@@ -271,15 +325,8 @@ export class SONOSService {
 		this.callAPI('Play', IP, {});
 	}
 
-	volumeSonos(volume, IP) {
-		this.callAPI('Volume', IP, { '{volume}': volume })
-			.subscribe(val => { console.log('volume', val); });
-	}
 
-	getPositionInfo(IP) {
-		return this.callAPI('GetPositionInfo', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
-	}
+
 
 	pauseSonos(IP) {
 
@@ -384,9 +431,6 @@ export class SONOSService {
 									// add it to the list
 									this.topologyList.push(location);
 
-
-
-
 									// add some fields
 									this.topology[location] = item['$'];
 									this.topology[location]['roomname'] = item['_'];
@@ -453,24 +497,37 @@ export class SONOSService {
 			.map(res => res.text())
 	}
 
+
+
+	volumeSonos(volume, IP) {
+		this.callAPI('Volume', IP, { '{volume}': volume })
+			.subscribe(val => { console.log('volume', val); });
+	}
+
+
+	getPositionInfo(IP) {
+		return this.callAPI('GetPositionInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
 	// 
 	private callAPI(sonosaction, sonosip, payload) {
 		let SOAPbody: string = SONOSSOAPTemplates[sonosaction];
 		let SOAPaction: string = SONOSSoapActions[sonosaction];
 		let SOAPurl: string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
 
-		console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
+		//console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
 
 		// do a search-replace of all the update data available and then do the HTTP request
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
 
-		
-		// add the preface and closing tags
-		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>` +
-				SOAPbody + `</s:Body></s:Envelope>`;
 
-		console.log('SOAPbody', SOAPbody);
+		// add the preface and closing tags
+		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>`
+			+ SOAPbody + `</s:Body></s:Envelope>`;
+
+		//console.log('SOAPbody', SOAPbody);
 
 
 		//this.doToast('API1 call ' + SOAPbody);
@@ -492,7 +549,7 @@ export class SONOSService {
 
 		// onderstaande werken (volume set)
 		//let soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume	";
-	//	let soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
+		//	let soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
 
 
 
@@ -505,14 +562,14 @@ export class SONOSService {
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
 
 			.map(res => res.text())
-			.map(res => {
-
-				this.doToast('API3 result ' + res);
-
-				xml2js.parseString(res, (err, result) => {
-					return result;
-				})
-			});
+		/*			.map(res => {
+		
+						this.doToast('API3 result ' + res);
+		
+						xml2js.parseString(res, (err, result) => {
+							return result;
+						})
+					});*/
 	}
 
 }
