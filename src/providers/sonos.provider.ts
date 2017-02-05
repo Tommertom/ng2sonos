@@ -3,7 +3,9 @@ import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from "rxjs/Rx";
-import { Http, Headers } from '@angular/http';
+import { Http, Headers, RequestOptions, RequestMethod } from '@angular/http';
+
+import { ToastController } from 'ionic-angular';
 
 import { UDPService } from './udp.provider';
 
@@ -114,16 +116,110 @@ export class SONOSService {
 
 	private sonosIPs: Array<string> = [];
 	private doRefresh: boolean = false;
-	private refreshdelay: number = 5000;
+	private refreshdelay: number = 1000;
 
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonosstates: BehaviorSubject<Object> = new BehaviorSubject({});
 
+	// mag weg
+	debugInfo: string = '';
+
 	constructor(
 		private UDPService: UDPService,
 		private http: Http,
+		private toastCtrl: ToastController
 	) { };
+
+
+
+
+	muteOrUnMute() {
+
+		var url, soapBody, soapAction;
+
+		//volume
+		url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
+
+		// for play/pause
+		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
+
+		// onderstaande werken (volume set)
+		soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume";
+		soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
+
+		console.log('s2', ('http://192.168.178.18:1400' + SONOSSoapURLs['Volume'] == url));
+		console.log('s1', (SONOSSoapActions['Volume'] == soapAction));
+		console.log('s4', (SONOSSOAPTemplates['Volume'].replace('{volume}', '30') == soapBody));
+		console.log('s5', SONOSSOAPTemplates['Volume'].replace('{volume}', '30'));
+		console.log('s55', soapBody);
+
+		// hier gebleven : waarom zijn de soaptemplates niet gelijk aan body?
+//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
+//<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>
+//<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume>
+//</s:Body></s:Envelope>
+//
+
+		// dit werkt nog niet
+		//soapAction = this.SoapActions.Play;
+		//soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>'
+		//	+ this.TEMPLATES.Play + '</s:Body></s:Envelope>';
+
+		//https://forum.ionicframework.com/t/how-convert-xml-input-file-to-json/40759/12
+
+		// aan het uitproberen
+		//	soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Speed>1</Speed></u:Play></s:Body></s:Envelope>';
+		//	soapAction = 'urn:schemas-upnp-org:service:AVTransport:1#Play';
+
+
+		//this.sendSoapRequest(url, soapBody, soapAction);
+
+		let xml = soapBody;
+
+		//	}
+
+		//http://stackoverflow.com/questions/33660712/angularjs-post-fails-response-for-preflight-has-invalid-http-status-code-404
+		//http://stackoverflow.com/questions/36258959/cors-enabled-but-response-for-preflight-has-invalid-http-status-code-404-when-po
+		//http://stackoverflow.com/questions/38881964/angular-2-token-response-for-preflight-has-invalid-http-status-code-400
+
+		//	sendSoapRequest(url, xml, soapAction) {
+		this.debugInfo = ''; //xml+url;
+
+		let headers = new Headers({ 'Content-Type': 'text/xml;charset=utf-8' });
+		//let headers = new Headers({ 'Content-Type': 'text/plain' });
+		headers.append('SOAPACTION', soapAction);
+		//	headers.append('CONTENT-LENGTH', xml.length);
+		headers.append('type', 'stream');
+
+		let options = new RequestOptions({ method: RequestMethod.Post, headers: headers });
+
+		var response = this.http.post(url, xml, options)
+			.subscribe(result => {
+				this.debugInfo = this.debugInfo + "--" + JSON.stringify(result);
+			}, error => { this.debugInfo = JSON.stringify(error); });
+	}
+
+
+
+	/**
+	 * Do a toast message.
+	 * 
+	 * @param {string} message - The message to be toasted.
+	 */
+	doToast(message) {
+		let toast = this.toastCtrl.create({
+			message: message,
+			duration: 3000,
+			position: 'top'
+		});
+
+		toast.onDidDismiss(() => {
+		});
+
+		toast.present();
+	}
+
 
 	// Init service is called when the app is started
 	initService(sonosIPs: Array<string>) {
@@ -137,7 +233,8 @@ export class SONOSService {
 		if (sonosIPs.length > 0) this.discoverSonosIP(sonosIPs);
 
 		// start UDP discovery anyway and if IP is found, try to find topology on it, doubling the effort
-		this.discoverSonosUDP();
+		// THIS DOES NOT WORK IN IONIC VIEW
+		//this.discoverSonosUDP();
 
 		// start emitting whatever we have
 		this.repeatSonosRefresh();
@@ -147,6 +244,9 @@ export class SONOSService {
 
 		// refresh all observables
 		this.refreshSonos();
+
+		// remove in later stage
+	//	this.doToast('Refreshing data');
 
 		//and repeat yourself if needed
 		if (this.doRefresh)
@@ -177,8 +277,8 @@ export class SONOSService {
 	}
 
 	getPositionInfo(IP) {
-		this.callAPI('GetPositionInfo', IP, {})
-			.subscribe(val => { console.log('getpos', val); });
+		return this.callAPI('GetPositionInfo', IP, {})
+		//	.subscribe(val => { console.log('getpos', val); });
 	}
 
 	pauseSonos(IP) {
@@ -203,8 +303,9 @@ export class SONOSService {
 
 	private emitAllZones() {
 		this.topologyList.map(ip => {
-			if (typeof this.topology[ip] !== 'undefined')
+			if (typeof this.topology[ip] !== 'undefined') {
 				this.sonoszones.next(this.topology[ip]);
+			}
 		});
 	}
 
@@ -234,10 +335,15 @@ export class SONOSService {
 	}
 
 	getSonosZoneObservable() {
+		//	this.doToast('get obs c');
+
 		return this.sonoszones.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
 	}
 
 	getSonosCoordinatorObservable() {
+
+		//	this.doToast('get obs c');
+
 		return this.sonoscoordinators.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
 	}
 
@@ -255,11 +361,14 @@ export class SONOSService {
 				this.getTopology(ip)
 					.subscribe(
 					(tplgy) => {
+
 						xml2js.parseString(tplgy, (err, result) => {
 							//console.log('ttt', result);
 
 							// search through the xml result tree for the array of zones
 							let itemlist = <Array<Object>>result['ZPSupportInfo']['ZonePlayers'][0]['ZonePlayer'];
+
+							//							this.doToast('in ss' + JSON.stringify(itemlist,null, 2));
 
 							itemlist.map(item => {
 
@@ -268,10 +377,15 @@ export class SONOSService {
 								location = location.replace('http://', '');
 								location = location.replace(':1400/xml/device_description.xml', '');
 
+								//this.doToast('location' + location);
+
 								// enrich the object to be store for later usage, if found
 								if (this.topologyList.indexOf(location) < 0) {
 									// add it to the list
 									this.topologyList.push(location);
+
+
+
 
 									// add some fields
 									this.topology[location] = item['$'];
@@ -284,6 +398,7 @@ export class SONOSService {
 											xml2js.parseString(value, (err, result) => {
 												this.topology[location]['device_description'] = result['root']['device'][0];
 
+												//									this.doToast('psuh location' + JSON.stringify(this.topology[location]['device_description'], null, 2));
 												//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
 											})
 										});
@@ -325,6 +440,8 @@ export class SONOSService {
 	private getTopology(ip: string) {
 		let SOAPurl = 'http://' + ip + ':1400/status/topology';
 
+		//	this.doToast('in get');
+
 		return this.http.get(SOAPurl)
 			.map(res => res.text())
 	}
@@ -338,9 +455,9 @@ export class SONOSService {
 
 	// 
 	private callAPI(sonosaction, sonosip, payload) {
-		let SOAPbody:string = SONOSSOAPTemplates[sonosaction];
-		let SOAPaction:string = SONOSSoapActions[sonosaction];
-		let SOAPurl:string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
+		let SOAPbody: string = SONOSSOAPTemplates[sonosaction];
+		let SOAPaction: string = SONOSSoapActions[sonosaction];
+		let SOAPurl: string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
 
 		console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
 
@@ -348,7 +465,17 @@ export class SONOSService {
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
 
+		
+		// add the preface and closing tags
+		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>` +
+				SOAPbody + `</s:Body></s:Envelope>`;
+
 		console.log('SOAPbody', SOAPbody);
+
+
+		//this.doToast('API1 call ' + SOAPbody);
+		//this.doToast('API2 call ' + SOAPaction);
+		//this.doToast('API3 call ' + SOAPurl);
 
 		// here the full SOAP call
 		let headers = new Headers({ 'Content-Type': 'text/xml' });
@@ -356,9 +483,32 @@ export class SONOSService {
 		headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
 		headers.append('type', 'stream');
 
+		//this.doToast('API sending');
+
+		//let url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
+
+		// for play/pause
+		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
+
+		// onderstaande werken (volume set)
+		//let soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume	";
+	//	let soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
+
+
+
+		//let options = new RequestOptions( {method: RequestMethod.Post, headers: headers });
+
+		//console.log( 'sss', headers, options);
+		//var response = this.http.post(url, xml, options)
+
+
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
+
 			.map(res => res.text())
 			.map(res => {
+
+				this.doToast('API3 result ' + res);
+
 				xml2js.parseString(res, (err, result) => {
 					return result;
 				})

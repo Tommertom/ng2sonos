@@ -7,6 +7,11 @@
   </ion-navbar>
 </ion-header>
 <ion-content>
+  <ion-card>
+    <pre>
+      {{debugInfo}}
+    </pre>
+  </ion-card>
   <ion-card *ngFor="let ip of deviceList">
     <ion-card-content>
       <ion-list>
@@ -15,13 +20,13 @@
             <img [src]="deviceData[ip].iconurl">
           </ion-avatar>
           <h1>{{ deviceData[ip].roomname}} <span *ngIf="deviceData[ip].coordinator=='true'"> - coordinator</span></h1> {{deviceData[ip].coordinator}}
-          <p>{{ deviceData[ip].uuid}}</p>
+          <p>{{ deviceData[ip].uuid}} {{ip}}</p>
         </ion-item>
       </ion-list>
       <button ion-button full (click)="getPositionInfo(ip)">Play</button>
       <button ion-button full (click)="volumeUp(ip)">Stop</button>
       <button ion-button full (click)="getPositionInfo(ip)">Volume UP</button>
-      <button ion-button full (click)="getPositionInfo(ip)">Volume Down</button>
+      <button ion-button full (click)="muteOrUnMute()">Volume Down</button>
     </ion-card-content>
   </ion-card>
   <ion-card *ngIf="deviceList.length == 0">

@@ -14,6 +14,8 @@ export class Page1 {
   //  idxList: Array<number> = [];
   sonosip: string = '192.168.178.22';
 
+  debugInfo: string = "no debug";
+
   deviceSubscription: any;
   // settings = defaultSettings;
 
@@ -27,8 +29,16 @@ export class Page1 {
     //this.domoticzService.initDomoticzService(this.settings); // to avoid issues when going to Page2 without startObserving
   }
 
+  addDebug(message) {
+    this.debugInfo = this.debugInfo + ' - ' + message;
+  }
+
+
+
   startObserving() {
     this.sonosService.initService([this.sonosip]);
+
+    this.addDebug('test');
 
     // set the initial list
     this.deviceList = [];

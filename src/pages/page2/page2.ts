@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ToastController, NavController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
 
+import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
 
 @Component({
   selector: 'page-page2',
@@ -10,14 +11,16 @@ import { SONOSService } from './../../providers/sonos.provider';
 export class Page2 {
 
   deviceList: Array<string> = [];
-  deviceData: Object = {};
 
+  deviceData: Object = {};
+  debugInfo: string = '';
   deviceSubscription: any;
 
   constructor(
     public navCtrl: NavController,
     public sonosService: SONOSService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private http: Http
   ) { }
 
   ngOnInit() {
@@ -25,12 +28,18 @@ export class Page2 {
   }
 
   getPositionInfo(ip) {
-    this.sonosService.getPositionInfo(ip);
+    this.sonosService.getPositionInfo(ip)
+      .subscribe(val => { this.doToast('posinfo' + JSON.stringify(val, null, 2)) });
   }
 
   volumeUp(ip) {
-    this.sonosService.volumeSonos('+1', ip);
+    this.sonosService.volumeSonos('20', ip);
   }
+
+  muteOrUnMute() {
+    this.sonosService.muteOrUnMute();
+  }
+
 
   startObserving() {
     // set the initial list
