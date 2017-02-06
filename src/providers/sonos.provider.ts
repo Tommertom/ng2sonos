@@ -19,7 +19,9 @@ export interface SonosSettingsModel {
 //npm install xml2js --save
 //npm install -g typings
 //typings install dt~xml2js --save
-import * as xml2js from "xml2js"
+import * as xml2js from "xml2js";
+
+import * as XML  from 'pixl-xml';
 
 // taken from https://github.com/jishi/node-sonos-http-api
 // and https://github.com/bencevans/node-sonos.git 
@@ -343,6 +345,10 @@ export class SONOSService {
 			.do(x => {
 
 				console.log('raw', x,'dd', x.text(),'\n\nsssss',x.toString());
+
+				console.log("alt xml", XML.decodeEntities(x.text()));
+				console.log('alt2 xml', XML.parse(XML.decode_entities(x.text())));
+
 				xml2js.parseString(x.text(), (err, result) => {
 					console.log('received value ', result);
 					console.log('json', JSON.stringify(result, null, 2));

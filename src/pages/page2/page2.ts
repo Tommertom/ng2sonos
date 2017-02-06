@@ -4,7 +4,61 @@ import { SONOSService } from './../../providers/sonos.provider';
 
 import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
 
-import * as xml2js from "xml2js"
+import * as xml2js from "xml2js";
+import * as XML  from 'pixl-xml';
+
+//declare module 'pixl-xml';
+
+/*
+
+Parser
+:
+XML(args, opts)
+XML
+:
+XML(args, opts)
+alwaysArray
+:
+always_array(obj, key)
+decodeEntities
+:
+decode_entities(text)
+encodeAttribEntities
+:
+encode_attrib_entities(text)
+encodeEntities
+:
+encode_entities(text)
+firstKey
+:
+first_key(hash)
+hashKeysToArray
+:
+hash_keys_to_array(hash)
+isaArray
+:
+isa_array(arg)
+isaHash
+:
+isa_hash(arg)
+numKeys
+:
+num_keys(hash)
+parse
+:
+parse_xml(text, opts)
+stringify
+:
+compose_xml(node, name, indent, indent_string, eol)
+trim
+:
+trim(text)
+__proto__
+:
+Object
+
+*/
+
 
 @Component({
   selector: 'page-page2',
@@ -27,6 +81,7 @@ export class Page2 {
 
   ngOnInit() {
     this.startObserving();
+    console.log('XML', XML);
   }
 
   getPositionInfo(ip) {
@@ -51,7 +106,6 @@ export class Page2 {
         xml2js.parseString(val, (err, result) => {
 							 console.log('zoneinfo', result);
 						})
-       
       });
   }
 
@@ -72,6 +126,7 @@ export class Page2 {
         console.log('transortinfo', val);
       });
   }
+
 
   volumeDown(ip) {
     this.sonosService.volumeSonos('5', ip);
