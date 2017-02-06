@@ -15,6 +15,7 @@ export class Page2 {
   deviceList: Array<string> = [];
 
   deviceData: Object = {};
+  stateData: Object = {};
   debugInfo: string = '';
   deviceSubscription: any;
   stateSubscription: any;
@@ -46,7 +47,7 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
-      });
+      }, (err) => { console.log('ERROR', err) });
   }
 
   getVolume(ip) {
@@ -63,7 +64,7 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
-        console.log('transortinfo', val);
+        // console.log('transortinfo', val);
       });
   }
 
@@ -85,7 +86,7 @@ export class Page2 {
     if (this.deviceSubscription !== undefined) {
       this.deviceSubscription.unsubscribe();
     }
-    
+
     // if we already observed stuff, then undo the subscription
     if (this.stateSubscription !== undefined) {
       this.stateSubscription.unsubscribe();
@@ -112,17 +113,20 @@ export class Page2 {
       );
 
 
-    // and start observing again
+    // and start observing again  -- will give an issue due to async stuff. Need to rework into observable
     this.stateSubscription = this.sonosService.getSonosStateObservable()
       .subscribe(
       value => {
         // only add state for devices we know
         if (this.deviceList.indexOf(value['ip']) != -1) {
+
           // and replace the data
           let ip = value['ip'];
-          this.deviceData[ip]['state'] = value;
+          this.stateData[ip] = value;
 
-          console.log('state receiver', this.deviceData);
+          this.stateData[ip]['TrackMetaData']['albumArtURI'] = 'http://' + ip + ':1400' + value['TrackMetaData']['upnp:albumArtURI'] || '';
+
+          //console.log('State for ' + ip, this.stateData[ip]);
         }
       },
       error => console.log(error),

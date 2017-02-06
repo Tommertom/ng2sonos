@@ -22,9 +22,16 @@
           <h1>{{ deviceData[ip].roomname}} <span *ngIf="deviceData[ip].coordinator=='true'"> - coordinator</span></h1> {{deviceData[ip].coordinator}}
           <p>{{ deviceData[ip].uuid}} {{ip}}</p>
         </ion-item>
+        <ion-item *ngIf="stateData[ip]">
+          <ion-avatar item-left>
+            <img [src]="stateData[ip].TrackMetaData.albumArtURI">
+          </ion-avatar>
+          <h1>sdfdsfds</h1>
+          <p>sdfdsfds</p>
+        </ion-item>
       </ion-list>
-      <button ion-button full (click)="getPositionInfo(ip)">Play</button>
-      <button ion-button full (click)="volumeUp(ip)">Stop</button>
+      <button ion-button full>Play</button>
+      <button ion-button full>Stop</button>
       <button ion-button full (click)="volumeUp(ip)">Volume UP</button>
       <button ion-button full (click)="volumeDown(ip)">Volume Down</button>
       <button ion-button full (click)="zoneInfo(ip)">Get Zone Info</button>

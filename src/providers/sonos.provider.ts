@@ -279,12 +279,14 @@ export class SONOSService {
 			.subscribe(posinfo => {
 				this.state[ip] = posinfo['s:Body']['u:GetPositionInfoResponse'];
 
-				// and clean it a bit
+				// and clean the object a bit
 				this.state[ip]['TrackMetaData'] = posinfo['s:Body']['u:GetPositionInfoResponse']['TrackMetaData']['DIDL-Lite']['item'];
 				delete this.state[ip]['TrackMetaData']['DIDL-Lite'];
 
-				console.log('statesender', this.state);
-				this.sonosstates.next(this.state);
+				this.state[ip]['ip'] = ip;
+
+				//console.log('statesender', this.state);
+				this.sonosstates.next(this.state[ip]);
 			});
 		});
 	}
