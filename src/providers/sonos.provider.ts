@@ -1,30 +1,28 @@
 import { UserData } from './../../../ionic-conference-app-master/src/providers/user-data';
 import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from "rxjs/Rx";
 import { Http, Headers, RequestOptions, RequestMethod } from '@angular/http';
 
-import { ToastController } from 'ionic-angular';
+/*
+Object.assign({}, obj1, obj2, obj3, etc);
+
+*/
 
 import { UDPService } from './udp.provider';
 
 export interface SonosSettingsModel {
 	sonosIPs: Array<string>;    // IP adress of sonos zones known
 	refreshdelayTopology: number;       // the ms to wait before a full refresh
-	refreshdelayPositionInfo: number;       // the ms to wait before a full refresh
+	refreshdelayState: number;       // the ms to wait before a full refresh
 }
 
-// package install 
-//npm install xml2js --save
-//npm install -g typings
-//typings install dt~xml2js --save
-import * as xml2js from "xml2js";
-
-import * as XML  from 'pixl-xml';
+//npm install --save pixl-xml
+import * as XML from 'pixl-xml';
 
 // taken from https://github.com/jishi/node-sonos-http-api
 // and https://github.com/bencevans/node-sonos.git 
+
 const SONOSSoapActions = {
 	SetEQ: 'urn:schemas-upnp-org:service:RenderingControl:1#SetEQ',
 	Play: 'urn:schemas-upnp-org:service:AVTransport:1#Play',
@@ -56,7 +54,6 @@ const SONOSSoapActions = {
 	// below from BenCEvans
 	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
 	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
-
 	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo'
 };
 
@@ -132,6 +129,7 @@ const SONOSSoapURLs = {
 export class SONOSService {
 
 	private topology: Object = {};
+	private state: Object = {};
 	private topologyList: Array<string> = [];
 
 	private sonosIPs: Array<string> = [];
@@ -141,45 +139,19 @@ export class SONOSService {
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonosstates: BehaviorSubject<Object> = new BehaviorSubject({});
-	private sonospositioninfo: BehaviorSubject<Object> = new BehaviorSubject({});
-
-
-	// mag weg
-	debugInfo: string = '';
 
 	constructor(
 		private UDPService: UDPService,
-		private http: Http,
-		private toastCtrl: ToastController //remove, silly to do a toast in a service
+		private http: Http
 	) { };
-
-
-	//remove, silly to do a toast in a service
-	/**
-	 * Do a toast message.
-	 * 
-	 * @param {string} message - The message to be toasted.
-	 */
-	doToast(message) {
-		let toast = this.toastCtrl.create({
-			message: message,
-			duration: 3000,
-			position: 'top'
-		});
-
-		toast.onDidDismiss(() => {
-		});
-
-		toast.present();
-	}
-
 
 	// Init service is called when the app is started
 	initService(sonosIPs: Array<string>) {
 
 		// start from scratch
 		this.topologyList = [];
-		this.topology = {};
+		this.topology = {}; //
+		this.state = {};
 		this.doRefresh = true;
 
 		// we are going to do IP based search and UDP search at the same time, whatever yields results will be used
@@ -191,67 +163,12 @@ export class SONOSService {
 
 		// start emitting whatever we have
 		this.repeatSonosRefresh();
-
-
-		// sasdas
-		let val = `
-
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-<s:Body>
-    <u:GetPositionInfoResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
-        <Track>14</Track>
-        <TrackDuration>0:02:17</TrackDuration>
-        <TrackMetaData>
-            <DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
-            <item id="-1" parentID="-1" restricted="true">
-                <res protocolInfo="x-file-cifs:*:audio/mpeg:*" duration="0:04:27">x-file-cifs://RASPBERRYPI/Folder/Music/Land.mp3</res>
-                <r:streamContent/>
-                <dc:title>Land</dc:title>
-                <upnp:class>object.item.audioItem.musicTrack</upnp:class>
-                <dc:creator>
-                </dc:creator>
-                <upnp:album>Music</upnp:album>
-                <upnp:originalTrackNumber>14</upnp:originalTrackNumber>
-                <r:albumArtist>Music </r:albumArtist>
-            </item>
-        </DIDL-Lite>
-    </TrackMetaData>
-    <TrackURI>x-file-cifs://RASPBERRYPI/Folder/Music/Land.mp3</TrackURI>
-    <RelTime>0:04:10</RelTime>
-    <AbsTime>NOT_IMPLEMENTED</AbsTime>
-    <RelCount>2147483647</RelCount>
-    <AbsCount>2147483647</AbsCount>
-</u:GetPositionInfoResponse>
-</s:Body>
-</s:Envelope>
-
-		`;
-
-		xml2js.parseString(val, (err, result) => {
-			//console.log('result xml', result);
-
-			//									this.doToast('psuh location' + JSON.stringify(this.topology[location]['device_description'], null, 2));
-			//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
-
-			console.log('sss', result);
-
-			//			let base = result['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
-			//			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
-
-			console.log('object', result, this.makePositionInfoObject(result));
-		})
-
 	}
 
 
-
 	repeatSonosRefresh() {
-
 		// refresh all observables
 		this.refreshSonos();
-
-		// remove in later stage
-		//	this.doToast('Refreshing data');
 
 		//and repeat yourself if needed
 		if (this.doRefresh)
@@ -262,7 +179,7 @@ export class SONOSService {
 
 	refreshSonos() {
 		this.emitAllZones();
-		this.emitAllCoordinators();
+		//this.emitAllCoordinators();
 		this.emitAllStates();
 	}
 
@@ -291,8 +208,8 @@ export class SONOSService {
 
 
 	volumeSonos(volume, IP) {
-		this.callAPI('Volume', IP, { '{volume}': volume })
-			.subscribe(val => { console.log('volume', val); });
+		return this.callAPI('Volume', IP, { '{volume}': volume })
+		//	.subscribe(val => { console.log('volume', val); });
 	}
 
 	getZoneInfo(IP) {
@@ -301,12 +218,10 @@ export class SONOSService {
 
 	getPositionInfo(IP) {
 		return this.callAPI('GetPositionInfo', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
 	}
 
 	getTransportInfo(IP) {
 		return this.callAPI('GetTransportInfo', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
 	}
 
 	getZoneVolume(IP) {
@@ -320,8 +235,6 @@ export class SONOSService {
 		let SOAPaction: string = SONOSSoapActions[sonosaction];
 		let SOAPurl: string = 'http://' + sonosip + ':1400' + SONOSSoapURLs[sonosaction];
 
-		//console.log('SOAPbody', SOAPbody.length, SOAPaction.length, SOAPurl.length, payload);
-
 		// do a search-replace of all the update data available and then do the HTTP request
 		for (var key in payload)
 			SOAPbody = SOAPbody.replace(key, payload[key]); // should do this until all occurences as gone, TODO
@@ -330,109 +243,14 @@ export class SONOSService {
 		SOAPbody = `<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body>`
 			+ SOAPbody + `</s:Body></s:Envelope>`;
 
-		//console.log('SOAPbody', SOAPbody);
-		console.log('API1 call ' + SOAPbody);
-		console.log('API2 call ' + SOAPaction);
-		console.log('API3 call ' + SOAPurl);
-
 		// here the full SOAP call
 		let headers = new Headers({ 'Content-Type': 'text/xml' });
 		headers.append('SOAPACTION', SOAPaction);
-		headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
+		//headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
 		headers.append('type', 'stream');
 
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
-			.do(x => {
-
-				console.log('raw', x,'dd', x.text(),'\n\nsssss',x.toString());
-
-				console.log("alt xml", XML.decodeEntities(x.text()));
-				console.log('alt2 xml', XML.parse(XML.decode_entities(x.text())));
-
-				xml2js.parseString(x.text(), (err, result) => {
-					console.log('received value ', result);
-					console.log('json', JSON.stringify(result, null, 2));
-
-					console.log('makepos', this.makePositionInfoObject(result));
-				})
-			})
-			.map(res => res.text())
-		/*			.map(res => {
-		
-						this.doToast('API3 result ' + res);
-		
-						xml2js.parseString(res, (err, result) => {
-							return result;
-						})
-					});*/
-	}
-
-	makePositionInfoObject(data) {
-
-
-		function isArray(item) {
-			return (Object.prototype.toString.call(item) === '[object Array]')
-		}
-
-		/**
-		 * Parse DIDL into track structure
-		 * @param  {String} didl
-		 * @return {object}
-		 
-		function parseDIDL(didl) {
-			if ((!didl) || (!didl['DIDL-Lite']) || (!isArray(didl['DIDL-Lite'].item)) || (!didl['DIDL-Lite'].item[0])) return {}
-			var item = didl['DIDL-Lite'].item[0]
-			return {
-				title: isArray(item['dc:title']) ? item['dc:title'][0] : null,
-				artist: isArray(item['dc:creator']) ? item['dc:creator'][0] : null,
-				album: isArray(item['upnp:album']) ? item['upnp:album'][0] : null,
-				albumArtURI: isArray(item['upnp:albumArtURI']) ? item['upnp:albumArtURI'][0] : null
-			}
-		}
-*/
-		let base = data['s:Envelope']['s:Body'][0]['u:GetPositionInfoResponse'][0];
-
-		console.log('Trying to make out of', data);
-		let returnobject = {};
-
-		// empty meta data or not?
-		if (typeof base['TrackMetaData'][0]['DIDL-Lite'] !== 'undefined') {
-
-			let metadata = base['TrackMetaData'][0]['DIDL-Lite'][0]['item'][0];
-
-			returnobject = {
-				'Track': base['Track'][0],
-				'TrackDuration': base['TrackDuration'][0],
-				'TrackURI': base['TrackURI'][0],
-				'title': metadata['dc:title'][0],
-				'class': metadata['upnp:class'][0],
-				'creator': metadata['dc:creator'][0],
-				'album': metadata['upnp:album'][0],
-				'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
-				'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
-				'albumArtist': metadata['r:albumArtist'][0],
-				'streamContent': metadata['r:streamContent'][0],
-				'TrackMetaData': true
-			}
-		} else {
-			returnobject = {
-				'Track': base['Track'][0],
-				'TrackDuration': base['TrackDuration'][0],
-				'TrackURI': base['TrackURI'][0],
-				'TrackMetaData': false
-				//'title': metadata['dc:title'][0],
-				//	'class': metadata['upnp:class'][0],
-				//'creator': metadata['dc:creator'][0],
-				//'album': metadata['upnp:album'][0],
-				//'protocolInfo': metadata['res'][0]['$']['protocolInfo'],
-				//	'originalTrackNumber': metadata['upnp:originalTrackNumber'][0],
-				//	'albumArtist': metadata['r:albumArtist'][0],
-				//	'streamContent': metadata['r:streamContent'][0]
-			}
-
-		}
-
-		return returnobject;
+			.map(res => XML.parse(XML.decodeEntities(res.text())))
 	}
 
 	private emitAllZones() {
@@ -445,17 +263,30 @@ export class SONOSService {
 
 	// change into filter on Zones
 	private emitAllCoordinators() {
-		this.topologyList.map(ip => {
-			if (typeof this.topology[ip] !== 'undefined') {
-				//console.log('test',this.topology[ip]['coordinator'], this.topology[ip]['coordinator'] == "true");
-				if (this.topology[ip]['coordinator'] == "true")
-					this.sonoscoordinators.next(this.topology[ip]);
-			}
-
-		});
+		/*	this.topologyList.map(ip => {
+				if (typeof this.topology[ip] !== 'undefined') {
+					if (this.topology[ip]['coordinator'] == "true")
+						this.sonoscoordinators.next(this.topology[ip]);
+				}
+	
+			}); */ // No longer needed as we filter the zone output and redirect
 	}
 
+	// for all zones found, emit the state as captured in a number of calls (tbd)
 	private emitAllStates() {
+		this.topologyList.map(ip => {
+			this.getPositionInfo(ip)
+			.subscribe(posinfo => {
+				this.state[ip] = posinfo['s:Body']['u:GetPositionInfoResponse'];
+
+				// and clean it a bit
+				this.state[ip]['TrackMetaData'] = posinfo['s:Body']['u:GetPositionInfoResponse']['TrackMetaData']['DIDL-Lite']['item'];
+				delete this.state[ip]['TrackMetaData']['DIDL-Lite'];
+
+				console.log('statesender', this.state);
+				this.sonosstates.next(this.state);
+			});
+		});
 	}
 
 	doneSonosService() {
@@ -469,16 +300,11 @@ export class SONOSService {
 	}
 
 	getSonosZoneObservable() {
-		//	this.doToast('get obs c');
-
 		return this.sonoszones.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
 	}
 
 	getSonosCoordinatorObservable() {
-
-		//	this.doToast('get obs c');
-
-		return this.sonoscoordinators.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
+		return this.getSonosZoneObservable().filter(res => res['coordinator'] == "true");
 	}
 
 	getSonosStateObservable() {
@@ -495,63 +321,52 @@ export class SONOSService {
 				this.getTopology(ip)
 					.subscribe(
 					(tplgy) => {
+						let result = XML.parse(XML.decodeEntities(tplgy));
 
-						xml2js.parseString(tplgy, (err, result) => {
-							//console.log('ttt', result);
+						//console.log('Result Topology', result);
 
-							// search through the xml result tree for the array of zones
-							let itemlist = <Array<Object>>result['ZPSupportInfo']['ZonePlayers'][0]['ZonePlayer'];
+						// search through the xml result tree for the array of zones
+						let itemlist = <Array<Object>>result['ZonePlayers']['ZonePlayer'];
 
-							//							this.doToast('in ss' + JSON.stringify(itemlist,null, 2));
+						// lets go through all the Zoneplayers found through the endpoint
+						itemlist.map(item => {
 
-							itemlist.map(item => {
+							//console.log('item', this.topology, this.topologyList);
+							let location = <string>item['location'];
+							location = location.replace('http://', '');
+							location = location.replace(':1400/xml/device_description.xml', '');
 
-								//console.log('item', this.topology, this.topologyList);
-								let location = <string>item['$']['location'];
-								location = location.replace('http://', '');
-								location = location.replace(':1400/xml/device_description.xml', '');
+							// enrich the object to be store for later usage, if found
+							if (this.topologyList.indexOf(location) < 0) {
+								// add it to the list
+								this.topologyList.push(location);
 
-								//this.doToast('location' + location);
+								// add data to overall store
+								this.topology[location] = item;
+								this.topology[location]['roomname'] = item['_Data'];
 
-								// enrich the object to be store for later usage, if found
-								if (this.topologyList.indexOf(location) < 0) {
-									// add it to the list
-									this.topologyList.push(location);
+								// add some fields
+								this.topology[location]['ip'] = location;
 
-									// add some fields
-									this.topology[location] = item['$'];
-									this.topology[location]['roomname'] = item['_'];
-									this.topology[location]['ip'] = location;
-
-									// and get some more device related data
-									this.getDeviceDescription(location)
-										.subscribe(value => {
-											xml2js.parseString(value, (err, result) => {
-												this.topology[location]['device_description'] = result['root']['device'][0];
-
-												//									this.doToast('psuh location' + JSON.stringify(this.topology[location]['device_description'], null, 2));
-												//if (location == "192.168.178.43") console.log('ssds',this.topology["192.168.178.43"]); //, JSON.stringify(this.topology["192.168.178.43"],null,2));
-											})
-										});
-								} // end if
-							});
-
-							//console.log('Topology object', this.topologyList, this.topology);
-
-						});
+								// and get some more device related data
+								this.getDeviceDescription(location)
+									.subscribe(value => {
+										let result = XML.parse(value);
+										//console.log('GET DEVICE DESC', result)
+										this.topology[location]['device_description'] = result['device'];
+									});
+							} // end if
+						}); // end map
 					},
 					(error) => {
 						console.log('Error checking topology');
 					}
 					);
-			}
-		});
+			} // end if
+		}); // end map
 	}
 
 	private discoverSonosUDP() {
-		// another attempt
-		//this.searchAttempt += 1;
-
 		// search data
 		let SONOS_SEARCHSTRING = 'M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: ssdp:discover\r\nMX: 1\r\nST: urn:schemas-upnp-org:device:ZonePlayer:1';
 		let PORT = 1900;
@@ -569,70 +384,14 @@ export class SONOSService {
 	}
 
 	private getTopology(ip: string) {
-		let SOAPurl = 'http://' + ip + ':1400/status/topology';
-
-		//	this.doToast('in get');
-
-		return this.http.get(SOAPurl)
+		return this.http.get('http://' + ip + ':1400/status/topology')
 			.map(res => res.text())
 	}
 
 	private getDeviceDescription(ip: string) {
-		let SOAPurl = 'http://' + ip + ':1400/xml/device_description.xml';
-
-		return this.http.get(SOAPurl)
+		return this.http.get('http://' + ip + ':1400/xml/device_description.xml')
 			.map(res => res.text())
 	}
-
-
-	// REMOVE
-
-	muteOrUnMute() {
-
-		var url, soapBody, soapAction;
-
-		//volume
-		url = 'http://192.168.178.18:1400/MediaRenderer/RenderingControl/Control';
-
-		// for play/pause
-		//url = 'http://192.168.178.18:1400/MediaRenderer/AVTransport/Control';
-
-		// onderstaande werken (volume set)
-		soapAction = "urn:schemas-upnp-org:service:RenderingControl:1#SetVolume";
-		soapBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>30</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
-
-		//console.log('s2', ('http://192.168.178.18:1400' + SONOSSoapURLs['Volume'] == url));
-		//console.log('s1', (SONOSSoapActions['Volume'] == soapAction));
-		//console.log('s4', (SONOSSOAPTemplates['Volume'].replace('{volume}', '30') == soapBody));
-		//console.log('s5', SONOSSOAPTemplates['Volume'].replace('{volume}', '30'));
-		//console.log('s55', soapBody);
-
-		let xml = soapBody;
-
-		//http://stackoverflow.com/questions/33660712/angularjs-post-fails-response-for-preflight-has-invalid-http-status-code-404
-		//http://stackoverflow.com/questions/36258959/cors-enabled-but-response-for-preflight-has-invalid-http-status-code-404-when-po
-		//http://stackoverflow.com/questions/38881964/angular-2-token-response-for-preflight-has-invalid-http-status-code-400
-
-		//	sendSoapRequest(url, xml, soapAction) {
-		this.debugInfo = ''; //xml+url;
-
-		let headers = new Headers({ 'Content-Type': 'text/xml;charset=utf-8' });
-		//let headers = new Headers({ 'Content-Type': 'text/plain' });
-		headers.append('SOAPACTION', soapAction);
-		//	headers.append('CONTENT-LENGTH', xml.length);
-		headers.append('type', 'stream');
-
-		let options = new RequestOptions({ method: RequestMethod.Post, headers: headers });
-
-		var response = this.http.post(url, xml, options)
-			.subscribe(result => {
-				this.debugInfo = this.debugInfo + "--" + JSON.stringify(result);
-			}, error => { this.debugInfo = JSON.stringify(error); });
-	}
-
-
-
-
 }
 
 	/*

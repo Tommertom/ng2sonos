@@ -1,63 +1,9 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { ToastController, NavController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
 
-import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
+//import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
 
-import * as xml2js from "xml2js";
-import * as XML  from 'pixl-xml';
-
-//declare module 'pixl-xml';
-
-/*
-
-Parser
-:
-XML(args, opts)
-XML
-:
-XML(args, opts)
-alwaysArray
-:
-always_array(obj, key)
-decodeEntities
-:
-decode_entities(text)
-encodeAttribEntities
-:
-encode_attrib_entities(text)
-encodeEntities
-:
-encode_entities(text)
-firstKey
-:
-first_key(hash)
-hashKeysToArray
-:
-hash_keys_to_array(hash)
-isaArray
-:
-isa_array(arg)
-isaHash
-:
-isa_hash(arg)
-numKeys
-:
-num_keys(hash)
-parse
-:
-parse_xml(text, opts)
-stringify
-:
-compose_xml(node, name, indent, indent_string, eol)
-trim
-:
-trim(text)
-__proto__
-:
-Object
-
-*/
 
 
 @Component({
@@ -71,23 +17,21 @@ export class Page2 {
   deviceData: Object = {};
   debugInfo: string = '';
   deviceSubscription: any;
+  stateSubscription: any;
 
   constructor(
     public navCtrl: NavController,
     public sonosService: SONOSService,
-    private toastCtrl: ToastController,
-    private http: Http
+    private toastCtrl: ToastController
   ) { }
 
   ngOnInit() {
     this.startObserving();
-    console.log('XML', XML);
   }
 
   getPositionInfo(ip) {
     this.sonosService.getPositionInfo(ip)
       .subscribe(val => {
-        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
         console.log('positioninfo', val);
       });
@@ -102,10 +46,6 @@ export class Page2 {
       .subscribe(val => {
         // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
-
-        xml2js.parseString(val, (err, result) => {
-							 console.log('zoneinfo', result);
-						})
       });
   }
 
@@ -133,7 +73,7 @@ export class Page2 {
   }
 
   muteOrUnMute() {
-    this.sonosService.muteOrUnMute();
+    //this.sonosService.muteOrUnMute();
   }
 
 
@@ -144,6 +84,11 @@ export class Page2 {
     // if we already observed stuff, then undo the subscription
     if (this.deviceSubscription !== undefined) {
       this.deviceSubscription.unsubscribe();
+    }
+    
+    // if we already observed stuff, then undo the subscription
+    if (this.stateSubscription !== undefined) {
+      this.stateSubscription.unsubscribe();
     }
 
     // and start observing again
@@ -158,15 +103,30 @@ export class Page2 {
         let ip = value['ip'];
         this.deviceData[ip] = value;
 
-        //console.log('stuff', value['device_description']['iconList'][0]['icon'][0]['url'][0] ); //['device_description']
-
         // complete some of the data for the view
-        this.deviceData[ip]['iconurl'] = 'http://' + ip + ':1400' + value['device_description']['iconList'][0]['icon'][0]['url'][0];
-        // console.log('stuff', this.deviceData[value['ip']]['iconurl']);
+        this.deviceData[ip]['iconurl'] = 'http://' + ip + ':1400' + value['device_description']['iconList']['icon']['url'];
       },
 
       error => console.log(error),
-      () => console.log('Finished')
+      () => console.log('Finished device update')
+      );
+
+
+    // and start observing again
+    this.stateSubscription = this.sonosService.getSonosStateObservable()
+      .subscribe(
+      value => {
+        // only add state for devices we know
+        if (this.deviceList.indexOf(value['ip']) != -1) {
+          // and replace the data
+          let ip = value['ip'];
+          this.deviceData[ip]['state'] = value;
+
+          console.log('state receiver', this.deviceData);
+        }
+      },
+      error => console.log(error),
+      () => console.log('Finished state update')
       );
   }
 

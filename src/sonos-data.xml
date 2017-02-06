@@ -56,6 +56,52 @@ Playing MP3
 </s:Envelope>
 
 
+{
+  "xmlns:s": "http://schemas.xmlsoap.org/soap/envelope/",
+  "s:encodingStyle": "http://schemas.xmlsoap.org/soap/encoding/",
+  "s:Body": {
+    "u:GetPositionInfoResponse": {
+      "xmlns:u": "urn:schemas-upnp-org:service:AVTransport:1",
+      "Track": "1",
+      "TrackDuration": "0:01:21",
+      "TrackMetaData": {
+        "DIDL-Lite": {
+          "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+          "xmlns:upnp": "urn:schemas-upnp-org:metadata-1-0/upnp/",
+          "xmlns:r": "urn:schemas-rinconnetworks-com:metadata-1-0/",
+          "xmlns": "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/",
+          "item": {
+            "id": "-1",
+            "parentID": "-1",
+            "restricted": "true",
+            "res": {
+              "protocolInfo": "x-file-cifs:*:audio/mpeg:*",
+              "duration": "0:05:41",
+              "_Data": "x-file-cifs://RASPy/01%20-%20Yoenue.mp3"
+            },
+            "r:streamContent": "",
+            "upnp:albumArtURI": "/getaa?u=x-file-cifs%3a%2f%2fRASPlis%2fMu%2520Truly%2520Trulynue.mp3&v=100",
+            "dc:title": "Hone",
+            "upnp:class": "object.item.audioItem.musicTrack",
+            "dc:creator": "Are",
+            "upnp:album": "Yy",
+            "upnp:originalTrackNumber": "1",
+            "r:albumArtist": "Ae"
+          }
+        }
+      },
+      "TrackURI": "x-file-cifs://RASy/01%20-%y%20-%20e.mp3",
+      "RelTime": "0:00:12",
+      "AbsTime": "NOT_IMPLEMENTED",
+      "RelCount": "2147483647",
+      "AbsCount": "2147483647"
+    }
+  }
+}
+
+
+
+
 //http://192.168.178.43:1400/xml/device_description.xml :
 <root xmlns="urn:schemas-upnp-org:device-1-0">
     <specVersion>
