@@ -1,4 +1,3 @@
-import { UserData } from './../../../ionic-conference-app-master/src/providers/user-data';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from "rxjs/Rx";
