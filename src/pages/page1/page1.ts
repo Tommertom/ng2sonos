@@ -11,13 +11,11 @@ export class Page1 {
 
   deviceList: Array<string> = [];
   deviceData: Object = {};
-  //  idxList: Array<number> = [];
+  deviceSubscription: any;
+
   sonosip: string = '192.168.178.22';
 
   debugInfo: string = "no debug";
-
-  deviceSubscription: any;
-  // settings = defaultSettings;
 
   constructor(
     public navCtrl: NavController,
@@ -26,14 +24,8 @@ export class Page1 {
   ) { }
 
   ngOnInit() {
-    //this.domoticzService.initDomoticzService(this.settings); // to avoid issues when going to Page2 without startObserving
+    this.startObserving();
   }
-
-  addDebug(message) {
-    this.debugInfo = this.debugInfo + ' - ' + message;
-  }
-
-
 
   startObserving() {
     this.sonosService.initService([this.sonosip]);
@@ -53,26 +45,31 @@ export class Page1 {
     this.deviceSubscription = this.sonosService.getSonosZoneObservable()
       .subscribe(
       value => {
-        //console.log('value received', value);
-
-        // if the device is already found, then don't add it
+        // no error received?
         if (typeof value['error'] === 'undefined')
+        // if the device is already found, then don't add it
         { if (this.deviceList.indexOf(value['ip']) == -1) this.deviceList.push(value['ip']); }
+        
         // if an error is received, we kill the watcher and need to do something smart
         else {
           console.log('Error received', value);
-          //this.sonosService.doneDomoticzService();
+          
           this.deviceSubscription.unsubscribe();
 
           this.doToast('There was an issue accessing SONOS server');
         }
 
-        // and replace the data
+        // and replace the data  
         this.deviceData[value['ip']] = value;
       },
 
       error => console.log(error));
   }
+
+  addDebug(message) {
+    this.debugInfo = this.debugInfo + ' - ' + message;
+  }
+
 
   /**
    * Do a toast message.

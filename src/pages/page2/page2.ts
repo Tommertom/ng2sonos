@@ -1,9 +1,7 @@
+import { UserData } from './../../../../ionic-conference-app-master/src/providers/user-data';
 import { Component } from '@angular/core';
 import { ToastController, NavController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
-
-//import { Http, Headers, RequestMethod, RequestOptions } from '@angular/http';
-
 
 
 @Component({
@@ -30,45 +28,48 @@ export class Page2 {
     this.startObserving();
   }
 
+  //
+  // Getters
+  //
+  getZoneAttributes(ip) {
+    this.sonosService.getZoneAttributes(ip)
+      .subscribe(val => {
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
+
   getPositionInfo(ip) {
     this.sonosService.getPositionInfo(ip)
       .subscribe(val => {
         this.debugInfo = JSON.stringify(val, null, 2);
-        console.log('positioninfo', val);
       });
   }
 
-  volumeUp(ip) {
-    this.sonosService.volumeSonos('20', ip);
-  }
-
-  zoneInfo(ip) {
+  getZoneInfo(ip) {
     this.sonosService.getZoneInfo(ip)
       .subscribe(val => {
-        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
-      }, (err) => { console.log('ERROR', err) });
+      });
+  }
+
+  getTransportInfo(ip) {
+    this.sonosService.getTransportInfo(ip)
+      .subscribe(val => {
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
   }
 
   getVolume(ip) {
     this.sonosService.getZoneVolume(ip)
       .subscribe(val => {
-        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
         this.debugInfo = JSON.stringify(val, null, 2);
       });
   }
 
 
-  getTransportInfo(ip) {
-    this.sonosService.getTransportInfo(ip)
-      .subscribe(val => {
-        // this.doToast('posinfo' + JSON.stringify(val, null, 2));
-        this.debugInfo = JSON.stringify(val, null, 2);
-        // console.log('transortinfo', val);
-      });
-  }
-
-
+  //
+  // Setters
+  //
   volumeDown(ip) {
     this.sonosService.volumeSonos('5', ip);
   }
@@ -78,6 +79,13 @@ export class Page2 {
   }
 
 
+  volumeUp(ip) {
+    this.sonosService.volumeSonos('20', ip);
+  }
+
+  // 
+  // Subscribe to the stream of UserData
+  //
   startObserving() {
     // set the initial list
     this.deviceList = [];

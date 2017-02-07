@@ -34,9 +34,10 @@
       <button ion-button full>Stop</button>
       <button ion-button full (click)="volumeUp(ip)">Volume UP</button>
       <button ion-button full (click)="volumeDown(ip)">Volume Down</button>
-      <button ion-button full (click)="zoneInfo(ip)">Get Zone Info</button>
+      <button ion-button full (click)="getZoneInfo(ip)">Get Zone Info</button>
       <button ion-button full (click)="getPositionInfo(ip)">Get Position Info</button>
       <button ion-button full (click)="getTransportInfo(ip)">Get TransportInfo</button>
+      <button ion-button full (click)="getZoneAttributes(ip)">Get Zone Attributes</button>
     </ion-card-content>
   </ion-card>
   <ion-card *ngIf="deviceList.length == 0">

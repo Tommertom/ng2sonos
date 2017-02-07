@@ -53,6 +53,7 @@ const SONOSSoapActions = {
 	// below from BenCEvans
 	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
 	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
+	GetZoneAttributes: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneAttributes',
 	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo'
 };
 
@@ -87,6 +88,7 @@ const SONOSSOAPTemplates = {
 	// From BenCEvans
 	GetTransportInfo: '<u:GetTransportInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetTransportInfo>',
 	GetZoneInfo: '<u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo>',
+	GetZoneAttributes: '<u:GetZoneAttributes xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneAttributes>',
 	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>'
 };
 
@@ -121,6 +123,7 @@ const SONOSSoapURLs = {
 	// From BenCEvans
 	GetTransportInfo: '/MediaRenderer/AVTransport/Control',
 	GetZoneInfo: '/DeviceProperties/Control',
+	GetZoneAttributes: '/DeviceProperties/Control',
 	GetVolume: '/MediaRenderer/AVTransport/Control'
 };
 
@@ -182,12 +185,16 @@ export class SONOSService {
 		this.emitAllStates();
 	}
 
+
+	//
+	// Setters
+	//
 	setEQ(eqType, value, IP) {
-		this.callAPI('SetEQ', IP, { '{value}': value });
+		return this.callAPI('SetEQ', IP, { '{value}': value });
 	}
 
 	playSonos(IP) {
-		this.callAPI('Play', IP, {});
+		return this.callAPI('Play', IP, {});
 	}
 
 	pauseSonos(IP) {
@@ -208,24 +215,55 @@ export class SONOSService {
 
 	volumeSonos(volume, IP) {
 		return this.callAPI('Volume', IP, { '{volume}': volume })
-		//	.subscribe(val => { console.log('volume', val); });
+	}
+
+	//
+	// Getters
+	//
+	getTransportInfo(IP) {
+		return this.callAPI('GetTransportInfo', IP, {})
 	}
 
 	getZoneInfo(IP) {
 		return this.callAPI('GetZoneInfo', IP, {})
 	}
 
+	getZoneAttributes(IP) {
+		return this.callAPI('GetZoneAttributes', IP, {})
+	}
+
 	getPositionInfo(IP) {
 		return this.callAPI('GetPositionInfo', IP, {})
 	}
 
-	getTransportInfo(IP) {
-		return this.callAPI('GetTransportInfo', IP, {})
-	}
-
 	getZoneVolume(IP) {
 		return this.callAPI('GetVolume', IP, {})
-		//	.subscribe(val => { console.log('getpos', val); });
+	}
+
+	// '<u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>{objectId}</ObjectID>
+	//  <BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter /><StartingIndex>{startIndex}</StartingIndex>
+	// <RequestedCount>{limit}</RequestedCount><SortCriteria /></u:Browse>',
+	//
+	getRadio(IP, searchType, searchTerm, options, callback) {
+		let radioTypes = {
+			'stations': 'R:0/0',
+			'shows': 'R:0/1'
+		}
+
+		let defaultOptions = {
+			BrowseFlag: 'BrowseDirectChildren',
+			Filter: '*',
+			StartingIndex: '0',
+			RequestedCount: '100',
+			SortCriteria: '',
+			ObjectID: 'R:0/0'
+		}
+
+		return this.callAPI('Browse', IP, {
+			'{objectId}': radioTypes[searchType],
+			'{startIndex}': '0',
+			'{limit}': '100',
+		})
 	}
 
 	// 
@@ -275,18 +313,18 @@ export class SONOSService {
 	private emitAllStates() {
 		this.topologyList.map(ip => {
 			this.getPositionInfo(ip)
-			.subscribe(posinfo => {
-				this.state[ip] = posinfo['s:Body']['u:GetPositionInfoResponse'];
+				.subscribe(posinfo => {
+					this.state[ip] = posinfo['s:Body']['u:GetPositionInfoResponse'];
 
-				// and clean the object a bit
-				this.state[ip]['TrackMetaData'] = posinfo['s:Body']['u:GetPositionInfoResponse']['TrackMetaData']['DIDL-Lite']['item'];
-				delete this.state[ip]['TrackMetaData']['DIDL-Lite'];
+					// and clean the object a bit
+					this.state[ip]['TrackMetaData'] = posinfo['s:Body']['u:GetPositionInfoResponse']['TrackMetaData']['DIDL-Lite']['item'];
+					delete this.state[ip]['TrackMetaData']['DIDL-Lite'];
 
-				this.state[ip]['ip'] = ip;
+					this.state[ip]['ip'] = ip;
 
-				//console.log('statesender', this.state);
-				this.sonosstates.next(this.state[ip]);
-			});
+					//console.log('statesender', this.state);
+					this.sonosstates.next(this.state[ip]);
+				});
 		});
 	}
 
