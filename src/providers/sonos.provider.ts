@@ -10,6 +10,9 @@ Object.assign({}, obj1, obj2, obj3, etc);
 
 import { UDPService } from './udp.provider';
 
+
+
+
 export interface SonosSettingsModel {
 	sonosIPs: Array<string>;    // IP adress of sonos zones known
 	refreshdelayTopology: number;       // the ms to wait before a full refresh
@@ -117,6 +120,16 @@ setEqLevel($type, $value)
             "ZP100" =>  "CONNECT:AMP",
             "ZP120" =>  "CONNECT:AMP",
         ];
+
+		playlists:
+		$data = $controller->soap("ContentDirectory", "Browse", [
+            "ObjectID"          =>  "SQ:",
+            "BrowseFlag"        =>  "BrowseDirectChildren",
+            "Filter"            =>  "",
+            "StartingIndex"     =>  0,
+            "RequestedCount"    =>  100,
+            "SortCriteria"      =>  "",
+        ]);
 		
 
 
@@ -494,7 +507,9 @@ export class SONOSService {
 
 	private discoverSonosIP(sonosIPs: Array<string>) {
 
-		//console.log('adsdas', sonosIPs);
+
+
+		console.log('adsdas', sonosIPs);
 		sonosIPs.map(ip => {
 
 			// if no topology was found until then, try to find
@@ -504,7 +519,7 @@ export class SONOSService {
 					(tplgy) => {
 						let result = XML.parse(XML.decodeEntities(tplgy));
 
-						//console.log('Result Topology', result);
+						console.log('Result Topology', result);
 
 						// search through the xml result tree for the array of zones
 						let itemlist = <Array<Object>>result['ZonePlayers']['ZonePlayer'];
@@ -554,13 +569,13 @@ export class SONOSService {
 		let multicastaddresses = ['239.255.255.250', '255.255.255.255'];
 
 		///sendUDPMessage(message: string, port: number, addresses: Array<string>, ttl: number, timetolisten: number) {
-		this.UDPService.sendUDPMessage(SONOS_SEARCHSTRING, PORT, multicastaddresses, 2, 5000)
+		this.UDPService.sendUDPMessage(SONOS_SEARCHSTRING, PORT, multicastaddresses, 2, 10000)
 			.subscribe(value => {
-				console.log('recevied udp data', value);
+				console.log('recevied udp data', value, <string>value['remoteAddress']);
 
 				// if data is received, then it contains an IP which can be used to find topology
 				if (typeof value['error'] === 'undefined')
-					this.discoverSonosIP([<string>value['ip']]);
+					this.discoverSonosIP([<string>value['remoteAddress']]);
 			});
 	}
 

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ToastController, NavController } from 'ionic-angular';
+import { ToastController, NavController, Platform } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
 
 
@@ -20,11 +20,18 @@ export class Page2 {
   constructor(
     public navCtrl: NavController,
     public sonosService: SONOSService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private pltfrm: Platform
   ) { }
 
   ngOnInit() {
     this.startObserving();
+
+    this.debugInfo = JSON.stringify(this.pltfrm.platforms()) + ' '
+      + JSON.stringify(this.pltfrm.is('mobileweb')) + ' '
+      + JSON.stringify(this.pltfrm.is('cordova')) + ' '
+      + JSON.stringify(this.pltfrm.is('mobile'))
+
   }
 
   //

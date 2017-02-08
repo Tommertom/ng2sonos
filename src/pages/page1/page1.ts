@@ -24,7 +24,7 @@ export class Page1 {
   ) { }
 
   ngOnInit() {
-    this.startObserving();
+   // this.startObserving();
   }
 
   startObserving() {

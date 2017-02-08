@@ -32,6 +32,11 @@ export class UDPService {
             return buf;
         }
 
+        function ab2str(buf) {
+            return String.fromCharCode.apply(null, new Uint8Array(buf));
+        };
+
+
         // only do udp stuff if there is plugin defined
         if (typeof chrome.sockets !== 'undefined') {
 
@@ -39,7 +44,7 @@ export class UDPService {
             chrome.sockets.udp.onReceive.addListener(
                 (info) => {
                     // we have found one 
-                    console.log('Recv from socket: ', info);
+                //      console.log('Recv from socket: ', info,ab2str(info.data) );
                     this.udpstream.next(info);
                 }
             );
@@ -69,7 +74,7 @@ export class UDPService {
                                         console.log('send fail: ' + sendresult);
                                         // close all the stuff, send has failed
                                         //this.closeUDPService();
-                                        this.udpstream({ 'error': sendresult });
+                                        this.udpstream.next({ 'error': sendresult });
                                     } else {
                                         console.log('sendTo: success ' + port, createInfo, bindresult, ttlresult, sbresult, sendresult);
                                     }
