@@ -1,4 +1,3 @@
-import { UserData } from './../../../../ionic-conference-app-master/src/providers/user-data';
 import { Component } from '@angular/core';
 import { ToastController, NavController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
@@ -66,6 +65,20 @@ export class Page2 {
       });
   }
 
+
+  getLibraryInfo(ip) {
+    this.sonosService.getLibraryInfo(ip, 'artists', 'Primus', 0, 100)
+      .subscribe(val => {
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
+
+  getMute(ip) {
+    this.sonosService.getMute(ip)
+      .subscribe(val => {
+        this.debugInfo = JSON.stringify(val, null, 2);
+      });
+  }
 
   //
   // Setters

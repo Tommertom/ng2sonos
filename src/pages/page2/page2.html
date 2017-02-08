@@ -9,7 +9,7 @@
 <ion-content class="page-page2">
   <ion-card>
     <pre>   
-      <ion-textarea class='selectable' rows="10" [(ngModel)]="debugInfo"></ion-textarea>
+     {{debugInfo}}
     </pre>
   </ion-card>
   <ion-card *ngFor="let ip of deviceList">
@@ -38,6 +38,9 @@
       <button ion-button full (click)="getPositionInfo(ip)">Get Position Info</button>
       <button ion-button full (click)="getTransportInfo(ip)">Get TransportInfo</button>
       <button ion-button full (click)="getZoneAttributes(ip)">Get Zone Attributes</button>
+      <button ion-button full (click)="getLibraryInfo(ip)">Get Library Info</button>
+      <button ion-button full (click)="getVolume(ip)">Get Volume</button>
+      <button ion-button full (click)="getMute(ip)">Get Mute</button>
     </ion-card-content>
   </ion-card>
   <ion-card *ngIf="deviceList.length == 0">

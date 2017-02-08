@@ -54,8 +54,109 @@ const SONOSSoapActions = {
 	GetZoneInfo: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo',
 	GetVolume: 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
 	GetZoneAttributes: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneAttributes',
-	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo'
+	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo',
+	GetMute: 'urn:schemas-upnp-org:service:RenderingControl:1#GetMute',
+	GetLightState:'urn:schemas-upnp-org:service:DeviceProperties:1#GetLEDState'
 };
+
+/*
+
+setEqLevel($type, $value)
+    {
+        if ($value < -10) {
+            $value = -10;
+        }
+        if ($value > 10) {
+            $value = 10;
+        }
+        $type = ucfirst(strtolower($type));
+        $this->soap("RenderingControl", "Set{$type}", [
+            "Channel"           =>  "Master",
+            "Desired{$type}"    =>  $value,
+        ]);
+        return $this;
+
+
+		setEqLevel($type, $value)
+    {
+        if ($value < -10) {
+            $value = -10;
+        }
+        if ($value > 10) {
+            $value = 10;
+        }
+        $type = ucfirst(strtolower($type));
+        $this->soap("RenderingControl", "Set{$type}", [
+            "Channel"           =>  "Master",
+            "Desired{$type}"    =>  $value,
+        ]);
+        return $this;
+
+   public function getBass()
+    {
+        return (int) $this->soap("RenderingControl", "GetBass", [
+            "Channel"           =>  "Master",
+        ]);
+    }
+		
+
+		     $soap = new \SoapClient(null, [
+            "location"  =>  $location,
+            "uri"       =>  "urn:schemas-upnp-org:service:{$service}:1",
+            "trace"     =>  true,
+        ]);
+		        $models = [
+            "S1"    =>  "PLAY:1",
+            "S12"   =>  "PLAY:1",
+            "S3"    =>  "PLAY:3",
+            "S5"    =>  "PLAY:5",
+            "S6"    =>  "PLAY:5",
+            "S9"    =>  "PLAYBAR",
+            "ZP80"  =>  "ZONEPLAYER",
+            "ZP90"  =>  "CONNECT",
+            "ZP100" =>  "CONNECT:AMP",
+            "ZP120" =>  "CONNECT:AMP",
+        ];
+		
+
+
+        $result = $this->controller->soap("ContentDirectory", "Browse", [
+            "ObjectID"          =>  "R:0/{$type}",
+            "BrowseFlag"        =>  "BrowseDirectChildren",
+            "Filter"            =>  "*",
+            "StartingIndex"     =>  0,
+            "RequestedCount"    =>  100,
+            "SortCriteria"      =>  "",
+        ]);
+	
+    public function getLoudness()
+    {
+        return (bool) $this->soap("RenderingControl", "GetLoudness", [
+            "Channel"       =>  "Master",
+        ]);
+    }
+
+
+    public function getMediaInfo()
+    {
+        return $this->soap("AVTransport", "GetMediaInfo");
+    }
+
+  $this->soap("RenderingControl", "SetRelativeVolume", [
+            "Channel"       =>  "Master",
+            "Adjustment"    =>  $adjust,
+        ]);
+
+GetCrossfadeMode
+
+@return array An array with 2 boolean elements (shuffle and repeat)
+  
+    public function getMode()
+    {
+        $data = $this->soap("AVTransport", "GetTransportSettings");
+        return Helper::getMode($data["PlayMode"]);
+
+*/
 
 const SONOSSOAPTemplates = {
 	SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
@@ -89,7 +190,9 @@ const SONOSSOAPTemplates = {
 	GetTransportInfo: '<u:GetTransportInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:GetTransportInfo>',
 	GetZoneInfo: '<u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo>',
 	GetZoneAttributes: '<u:GetZoneAttributes xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneAttributes>',
-	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>'
+	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>',
+	GetMute:'<u:GetMute xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetMute>',
+	GetLightState: 		'<u:GetLEDState xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetLEDState>'
 };
 
 const SONOSSoapURLs = {
@@ -121,10 +224,12 @@ const SONOSSoapURLs = {
 	ListAvailableServices: '/MediaRenderer/MusicServices/Control',
 
 	// From BenCEvans
-	GetTransportInfo: '/MediaRenderer/AVTransport/Control',
-	GetZoneInfo: '/DeviceProperties/Control',
-	GetZoneAttributes: '/DeviceProperties/Control',
-	GetVolume: '/MediaRenderer/AVTransport/Control'
+	GetTransportInfo: 	'/MediaRenderer/AVTransport/Control',
+	GetZoneInfo: 		'/DeviceProperties/Control',
+	GetZoneAttributes: 	'/DeviceProperties/Control',
+	GetVolume: 			'/MediaRenderer/RenderingControl/Control',
+	GetMute: 			'/MediaRenderer/RenderingControl/Control',
+	GetLightState: 		'/DeviceProperties/Control'
 };
 
 @Injectable()
@@ -136,7 +241,7 @@ export class SONOSService {
 
 	private sonosIPs: Array<string> = [];
 	private doRefresh: boolean = false;
-	private refreshdelay: number = 1000;
+	private refreshdelay: number = 5000;
 
 	private sonoszones: BehaviorSubject<Object> = new BehaviorSubject({});
 	private sonoscoordinators: BehaviorSubject<Object> = new BehaviorSubject({});
@@ -240,6 +345,42 @@ export class SONOSService {
 		return this.callAPI('GetVolume', IP, {})
 	}
 
+	getMute(IP) {
+		return this.callAPI('GetMute', IP, {})
+	}
+
+	getLibraryInfo(IP, searchtype, searchterm, startIndex, requestCount) {
+
+		let searches = {
+			'artists': 'A:ARTIST',
+			'albumArtists': 'A:ALBUMARTIST',
+			'albums': 'A:ALBUM',
+			'genres': 'A:GENRE',
+			'composers': 'A:COMPOSER',
+			'tracks': 'A:TRACKS',
+			'playlists': 'A:PLAYLISTS',
+			'sonos_playlists': 'SQ:',
+			'share': 'S:'
+		}
+		let defaultOptions = {
+			BrowseFlag: 'BrowseDirectChildren',
+			Filter: '*',
+			StartingIndex: '0',
+			RequestedCount: '100',
+			SortCriteria: ''
+		}
+
+		// add a search term if possible
+		let opensearch = (!searchterm) || (searchterm === '');
+		if (!opensearch) searches = searches[searchtype].concat(':' + searchterm);
+
+		return this.callAPI('Browse', IP, {
+			'{objectId}': searches,
+			'{startIndex}': startIndex,
+			'{limit}': requestCount
+		})
+	}
+
 	// '<u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>{objectId}</ObjectID>
 	//  <BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter /><StartingIndex>{startIndex}</StartingIndex>
 	// <RequestedCount>{limit}</RequestedCount><SortCriteria /></u:Browse>',
@@ -288,6 +429,7 @@ export class SONOSService {
 
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
 			.map(res => XML.parse(XML.decodeEntities(res.text())))
+			.do(x => {console.log('API result',x)})
 	}
 
 	private emitAllZones() {
