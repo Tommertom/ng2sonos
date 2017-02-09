@@ -6,7 +6,7 @@ import { BehaviorSubject } from "rxjs/Rx";
 //import 'rxjs/add/operator/map';
 
 // plugin installation needed:
-// ionic i cordova-plugin-chrome-apps-sockets-udp
+// ionic plugin add --save  cordova-plugin-chrome-apps-sockets-udp
 // https://www.npmjs.com/package/cordova-plugin-chrome-apps-sockets-udp
 declare var chrome;
 

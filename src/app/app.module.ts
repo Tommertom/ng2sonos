@@ -5,6 +5,7 @@ import { Page1 } from '../pages/page1/page1';
 
 import { SONOSService } from './../providers/sonos.provider';
 import { UDPService } from './../providers/udp.provider';
+import { TCPService } from './../providers/tcp.provider';
 
 import { Page2 } from '../pages/page2/page2';
 
@@ -23,6 +24,7 @@ import { Page2 } from '../pages/page2/page2';
     Page1,
     Page2
   ],
-  providers: [SONOSService,UDPService, { provide: ErrorHandler, useClass: IonicErrorHandler }]
+  providers: [TCPService, SONOSService, UDPService,
+    { provide: ErrorHandler, useClass: IonicErrorHandler }]
 })
 export class AppModule { }

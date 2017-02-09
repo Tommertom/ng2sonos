@@ -9,6 +9,7 @@ Object.assign({}, obj1, obj2, obj3, etc);
 */
 
 import { UDPService } from './udp.provider';
+import { TCPService } from './tcp.provider';
 
 
 

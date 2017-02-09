@@ -27,11 +27,6 @@ export class Page2 {
   ngOnInit() {
     this.startObserving();
 
-    this.debugInfo = JSON.stringify(this.pltfrm.platforms()) + ' '
-      + JSON.stringify(this.pltfrm.is('mobileweb')) + ' '
-      + JSON.stringify(this.pltfrm.is('cordova')) + ' '
-      + JSON.stringify(this.pltfrm.is('mobile'))
-
   }
 
   //
