@@ -1,31 +1,21 @@
-import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from "rxjs/Rx";
-import { Http, Headers, RequestOptions, RequestMethod } from '@angular/http';
-
-/*
-Object.assign({}, obj1, obj2, obj3, etc);
-
-*/
+import { Http, Headers, RequestMethod } from '@angular/http';
 
 import { UDPService } from './udp.provider';
 import { TCPService } from './tcp.provider';
 
-
-
-
 export interface SonosSettingsModel {
-	sonosIPs: Array<string>;    // IP adress of sonos zones known
-	refreshdelayTopology: number;       // the ms to wait before a full refresh
-	refreshdelayState: number;       // the ms to wait before a full refresh
+	sonosIPs: Array<string>;    	// IP adress of sonos zones known
+	refreshdelayTopology: number;   // the ms to wait before a full refresh
+	refreshdelayState: number;      // the ms to wait before a full refresh
 }
 
 //npm install --save pixl-xml
 import * as XML from 'pixl-xml';
 
-// taken from https://github.com/jishi/node-sonos-http-api
+// API references taken from https://github.com/jishi/node-sonos-http-api
 // and https://github.com/bencevans/node-sonos.git 
-
 const SONOSSoapActions = {
 	SetEQ: 'urn:schemas-upnp-org:service:RenderingControl:1#SetEQ',
 	Play: 'urn:schemas-upnp-org:service:AVTransport:1#Play',
@@ -60,117 +50,9 @@ const SONOSSoapActions = {
 	GetZoneAttributes: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneAttributes',
 	GetTransportInfo: 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo',
 	GetMute: 'urn:schemas-upnp-org:service:RenderingControl:1#GetMute',
-	GetLightState:'urn:schemas-upnp-org:service:DeviceProperties:1#GetLEDState'
+	GetLightState: 'urn:schemas-upnp-org:service:DeviceProperties:1#GetLEDState'
 };
 
-/*
-
-setEqLevel($type, $value)
-    {
-        if ($value < -10) {
-            $value = -10;
-        }
-        if ($value > 10) {
-            $value = 10;
-        }
-        $type = ucfirst(strtolower($type));
-        $this->soap("RenderingControl", "Set{$type}", [
-            "Channel"           =>  "Master",
-            "Desired{$type}"    =>  $value,
-        ]);
-        return $this;
-
-
-		setEqLevel($type, $value)
-    {
-        if ($value < -10) {
-            $value = -10;
-        }
-        if ($value > 10) {
-            $value = 10;
-        }
-        $type = ucfirst(strtolower($type));
-        $this->soap("RenderingControl", "Set{$type}", [
-            "Channel"           =>  "Master",
-            "Desired{$type}"    =>  $value,
-        ]);
-        return $this;
-
-   public function getBass()
-    {
-        return (int) $this->soap("RenderingControl", "GetBass", [
-            "Channel"           =>  "Master",
-        ]);
-    }
-		
-
-		     $soap = new \SoapClient(null, [
-            "location"  =>  $location,
-            "uri"       =>  "urn:schemas-upnp-org:service:{$service}:1",
-            "trace"     =>  true,
-        ]);
-		        $models = [
-            "S1"    =>  "PLAY:1",
-            "S12"   =>  "PLAY:1",
-            "S3"    =>  "PLAY:3",
-            "S5"    =>  "PLAY:5",
-            "S6"    =>  "PLAY:5",
-            "S9"    =>  "PLAYBAR",
-            "ZP80"  =>  "ZONEPLAYER",
-            "ZP90"  =>  "CONNECT",
-            "ZP100" =>  "CONNECT:AMP",
-            "ZP120" =>  "CONNECT:AMP",
-        ];
-
-		playlists:
-		$data = $controller->soap("ContentDirectory", "Browse", [
-            "ObjectID"          =>  "SQ:",
-            "BrowseFlag"        =>  "BrowseDirectChildren",
-            "Filter"            =>  "",
-            "StartingIndex"     =>  0,
-            "RequestedCount"    =>  100,
-            "SortCriteria"      =>  "",
-        ]);
-		
-
-
-        $result = $this->controller->soap("ContentDirectory", "Browse", [
-            "ObjectID"          =>  "R:0/{$type}",
-            "BrowseFlag"        =>  "BrowseDirectChildren",
-            "Filter"            =>  "*",
-            "StartingIndex"     =>  0,
-            "RequestedCount"    =>  100,
-            "SortCriteria"      =>  "",
-        ]);
-	
-    public function getLoudness()
-    {
-        return (bool) $this->soap("RenderingControl", "GetLoudness", [
-            "Channel"       =>  "Master",
-        ]);
-    }
-
-
-    public function getMediaInfo()
-    {
-        return $this->soap("AVTransport", "GetMediaInfo");
-    }
-
-  $this->soap("RenderingControl", "SetRelativeVolume", [
-            "Channel"       =>  "Master",
-            "Adjustment"    =>  $adjust,
-        ]);
-
-GetCrossfadeMode
-
-@return array An array with 2 boolean elements (shuffle and repeat)
-  
-    public function getMode()
-    {
-        $data = $this->soap("AVTransport", "GetTransportSettings");
-        return Helper::getMode($data["PlayMode"]);
-
-*/
 
 const SONOSSOAPTemplates = {
 	SetEQ: '<u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><EQType>{eqType}</EQType><DesiredValue>{value}</DesiredValue></u:SetEQ>',
@@ -205,8 +87,8 @@ const SONOSSOAPTemplates = {
 	GetZoneInfo: '<u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo>',
 	GetZoneAttributes: '<u:GetZoneAttributes xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneAttributes>',
 	GetVolume: '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume>',
-	GetMute:'<u:GetMute xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetMute>',
-	GetLightState: 		'<u:GetLEDState xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetLEDState>'
+	GetMute: '<u:GetMute xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetMute>',
+	GetLightState: '<u:GetLEDState xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetLEDState>'
 };
 
 const SONOSSoapURLs = {
@@ -238,12 +120,12 @@ const SONOSSoapURLs = {
 	ListAvailableServices: '/MediaRenderer/MusicServices/Control',
 
 	// From BenCEvans
-	GetTransportInfo: 	'/MediaRenderer/AVTransport/Control',
-	GetZoneInfo: 		'/DeviceProperties/Control',
-	GetZoneAttributes: 	'/DeviceProperties/Control',
-	GetVolume: 			'/MediaRenderer/RenderingControl/Control',
-	GetMute: 			'/MediaRenderer/RenderingControl/Control',
-	GetLightState: 		'/DeviceProperties/Control'
+	GetTransportInfo: '/MediaRenderer/AVTransport/Control',
+	GetZoneInfo: '/DeviceProperties/Control',
+	GetZoneAttributes: '/DeviceProperties/Control',
+	GetVolume: '/MediaRenderer/RenderingControl/Control',
+	GetMute: '/MediaRenderer/RenderingControl/Control',
+	GetLightState: '/DeviceProperties/Control'
 };
 
 @Injectable()
@@ -263,6 +145,7 @@ export class SONOSService {
 
 	constructor(
 		private UDPService: UDPService,
+		private TCPService: TCPService,
 		private http: Http
 	) { };
 
@@ -285,7 +168,6 @@ export class SONOSService {
 		// start emitting whatever we have
 		this.repeatSonosRefresh();
 	}
-
 
 	repeatSonosRefresh() {
 		// refresh all observables
@@ -363,6 +245,7 @@ export class SONOSService {
 		return this.callAPI('GetMute', IP, {})
 	}
 
+	// Does not work
 	getLibraryInfo(IP, searchtype, searchterm, startIndex, requestCount) {
 
 		let searches = {
@@ -399,6 +282,7 @@ export class SONOSService {
 	//  <BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter /><StartingIndex>{startIndex}</StartingIndex>
 	// <RequestedCount>{limit}</RequestedCount><SortCriteria /></u:Browse>',
 	//
+	// Does not work
 	getRadio(IP, searchType, searchTerm, options, callback) {
 		let radioTypes = {
 			'stations': 'R:0/0',
@@ -421,7 +305,7 @@ export class SONOSService {
 		})
 	}
 
-	// 
+	// Universal SOAP caller
 	private callAPI(sonosaction, sonosip, payload) {
 		let SOAPbody: string = SONOSSOAPTemplates[sonosaction];
 		let SOAPaction: string = SONOSSoapActions[sonosaction];
@@ -438,12 +322,11 @@ export class SONOSService {
 		// here the full SOAP call
 		let headers = new Headers({ 'Content-Type': 'text/xml' });
 		headers.append('SOAPACTION', SOAPaction);
-		//headers.append('CONTENT-LENGTH', SOAPbody.length.toString());
 		headers.append('type', 'stream');
 
 		return this.http.post(SOAPurl, SOAPbody, { headers: headers })
 			.map(res => XML.parse(XML.decodeEntities(res.text())))
-			.do(x => {console.log('API result',x)})
+			.do(x => { console.log('API result', x) })
 	}
 
 	private emitAllZones() {
@@ -506,11 +389,28 @@ export class SONOSService {
 		return this.sonosstates.asObservable().skip(1); // hack? need to skip the first item emitted due to the creation
 	}
 
+	subscribeSonosEvents(ip) {
+		console.log('IP',ip);
+		this.TCPService.sendTCPMessage('',  ip,3400)
+			.subscribe((stuff) => { console.log('stuff', stuff); });
+	}
+
+/*
+  upnpEventListener.subscribeServiceEvent(device, 'AVTransport', upnpEventCallback);
+
+  // Volume control events
+  upnpEventListener.subscribeServiceEvent(device, 'RenderingControl', upnpEventCallback);
+
+  // Queue change events
+  upnpEventListener.subscribeServiceEvent(device, 'Queue', upnpEventCallback);
+
+  // Group management events
+  upnpEventListener.subscribeServiceEvent(device, 'GroupManagement', upnpEventCallback);
+*/
+
 	private discoverSonosIP(sonosIPs: Array<string>) {
 
-
-
-		console.log('adsdas', sonosIPs);
+		//console.log('adsdas', sonosIPs);
 		sonosIPs.map(ip => {
 
 			// if no topology was found until then, try to find
@@ -642,4 +542,113 @@ export class SONOSService {
 		USN: uuid:2f402f80-da50-11e1-9b23-00178829d301
 //		let UPNPALL_SEARCHSTRING = "M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 5\r\nST: ssdp:all\r\n\r\n";
 //		let UPNPROOTDEVICE_SEARCHSTRING = "M-SEARCH * HTTP/1.1\r\nHost: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 5\r\nST: upnp:rootdevice\r\n\r\n";
+*/
+
+/*
+
+setEqLevel($type, $value)
+    {
+        if ($value < -10) {
+            $value = -10;
+        }
+        if ($value > 10) {
+            $value = 10;
+        }
+        $type = ucfirst(strtolower($type));
+        $this->soap("RenderingControl", "Set{$type}", [
+            "Channel"           =>  "Master",
+            "Desired{$type}"    =>  $value,
+        ]);
+        return $this;
+
+
+		setEqLevel($type, $value)
+    {
+        if ($value < -10) {
+            $value = -10;
+        }
+        if ($value > 10) {
+            $value = 10;
+        }
+        $type = ucfirst(strtolower($type));
+        $this->soap("RenderingControl", "Set{$type}", [
+            "Channel"           =>  "Master",
+            "Desired{$type}"    =>  $value,
+        ]);
+        return $this;
+
+   public function getBass()
+    {
+        return (int) $this->soap("RenderingControl", "GetBass", [
+            "Channel"           =>  "Master",
+        ]);
+    }
+		
+
+		     $soap = new \SoapClient(null, [
+            "location"  =>  $location,
+            "uri"       =>  "urn:schemas-upnp-org:service:{$service}:1",
+            "trace"     =>  true,
+        ]);
+		        $models = [
+            "S1"    =>  "PLAY:1",
+            "S12"   =>  "PLAY:1",
+            "S3"    =>  "PLAY:3",
+            "S5"    =>  "PLAY:5",
+            "S6"    =>  "PLAY:5",
+            "S9"    =>  "PLAYBAR",
+            "ZP80"  =>  "ZONEPLAYER",
+            "ZP90"  =>  "CONNECT",
+            "ZP100" =>  "CONNECT:AMP",
+            "ZP120" =>  "CONNECT:AMP",
+        ];
+
+		playlists:
+		$data = $controller->soap("ContentDirectory", "Browse", [
+            "ObjectID"          =>  "SQ:",
+            "BrowseFlag"        =>  "BrowseDirectChildren",
+            "Filter"            =>  "",
+            "StartingIndex"     =>  0,
+            "RequestedCount"    =>  100,
+            "SortCriteria"      =>  "",
+        ]);
+		
+
+
+        $result = $this->controller->soap("ContentDirectory", "Browse", [
+            "ObjectID"          =>  "R:0/{$type}",
+            "BrowseFlag"        =>  "BrowseDirectChildren",
+            "Filter"            =>  "*",
+            "StartingIndex"     =>  0,
+            "RequestedCount"    =>  100,
+            "SortCriteria"      =>  "",
+        ]);
+	
+    public function getLoudness()
+    {
+        return (bool) $this->soap("RenderingControl", "GetLoudness", [
+            "Channel"       =>  "Master",
+        ]);
+    }
+
+
+    public function getMediaInfo()
+    {
+        return $this->soap("AVTransport", "GetMediaInfo");
+    }
+
+  $this->soap("RenderingControl", "SetRelativeVolume", [
+            "Channel"       =>  "Master",
+            "Adjustment"    =>  $adjust,
+        ]);
+
+GetCrossfadeMode
+
+@return array An array with 2 boolean elements (shuffle and repeat)
+  
+    public function getMode()
+    {
+        $data = $this->soap("AVTransport", "GetTransportSettings");
+        return Helper::getMode($data["PlayMode"]);
+
 */

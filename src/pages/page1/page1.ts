@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
 import { SONOSService } from './../../providers/sonos.provider';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'page-page1',
@@ -24,7 +23,11 @@ export class Page1 {
   ) { }
 
   ngOnInit() {
-   // this.startObserving();
+    // this.startObserving();
+  }
+
+  startSUB() {
+    this.sonosService.subscribeSonosEvents('192.168.178.22');
   }
 
   startObserving() {
@@ -49,11 +52,11 @@ export class Page1 {
         if (typeof value['error'] === 'undefined')
         // if the device is already found, then don't add it
         { if (this.deviceList.indexOf(value['ip']) == -1) this.deviceList.push(value['ip']); }
-        
+
         // if an error is received, we kill the watcher and need to do something smart
         else {
           console.log('Error received', value);
-          
+
           this.deviceSubscription.unsubscribe();
 
           this.doToast('There was an issue accessing SONOS server');
