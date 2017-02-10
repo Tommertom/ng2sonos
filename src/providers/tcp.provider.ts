@@ -7,6 +7,38 @@ import { BehaviorSubject } from "rxjs/Rx";
 
 declare var chrome;
 
+/*
+
+var phrase = 'Hello World!';
+    console.log(/^[A-Z]/.test(phrase));
+
+var phrase = 'hello world!';
+    console.log(/^[A-Z]/.test(phrase));
+
+
+    var word = "Someword";
+console.log( /[A-Z]/.test( word[0]) );
+var str = "How are you doing today?";
+var res = str.split(" ");
+
+newpath.replace(/\\/g,"\\\\");
+
+var ages = [32, 33, 16, 40];
+
+function checkAdult(age) {
+    return age >= 18;
+}
+
+function myFunction() {
+    document.getElementById("demo").innerHTML = ages.filter(checkAdult);
+}
+Sort numbers in an array in ascending order:
+
+var points = [40, 100, 1, 5, 25, 10];
+points.sort(function(a, b){return a-b});
+
+*/
+
 
 @Injectable()
 export class TCPService {
